@@ -478,6 +478,17 @@ function salvarApiKey() {
 // ════════════════════════════════════════════════════════
 // API — football-data.org
 // ════════════════════════════════════════════════════════
+async function fetchAPI(endpoint) {
+  const usarProxy = window.location.protocol !== 'file:';
+  let url = `${API_BASE}${endpoint}`;
+  if (usarProxy) {
+    url = `/api/proxy?endpoint=${encodeURIComponent(endpoint)}`;
+  }
+  return fetch(url, {
+    headers: { 'X-Auth-Token': apiKey }
+  });
+}
+
 async function buscarDadosAPI() {
   if (!apiKey) {
     setStatus('err', 'API Key não configurada — clique em ⚙ API Key');
@@ -485,9 +496,7 @@ async function buscarDadosAPI() {
   }
   setStatus('loading', 'Buscando placares...');
   try {
-    const resp = await fetch(`${API_BASE}/competitions/${COMP_ID}/matches`, {
-      headers: { 'X-Auth-Token': apiKey }
-    });
+    const resp = await fetchAPI(`/competitions/${COMP_ID}/matches`);
     if (!resp.ok) {
       if (resp.status === 401) {
         setStatus('err', 'API Key inválida — verifique e tente novamente');
@@ -504,7 +513,11 @@ async function buscarDadosAPI() {
     const aoVivo = (data.matches||[]).some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
     setStatus('ok', `Atualizado às ${agora}${aoVivo ? ' · 🔴 Ao vivo' : ''}`);
   } catch(e) {
-    setStatus('err', 'Sem conexão — usando dados salvos');
+    if (window.location.protocol === 'file:') {
+      setStatus('err', 'Bloqueio local (CORS) — Abra o app pelo arquivo "Iniciar_Tabela.bat"');
+    } else {
+      setStatus('err', 'Sem conexão — usando dados salvos');
+    }
   }
 }
 
@@ -986,9 +999,7 @@ async function abrirH2H(jogoId, t1, t2) {
   }
 
   try {
-    const resp = await fetch(`${API_BASE}/matches/${apiId}/head2head?limit=10`, {
-      headers: { 'X-Auth-Token': apiKey }
-    });
+    const resp = await fetchAPI(`/matches/${apiId}/head2head?limit=10`);
     if (!resp.ok) throw new Error('API error');
     const data = await resp.json();
     h2hCache[cacheKey] = { data: data, ts: agora };
