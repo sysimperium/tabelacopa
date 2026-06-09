@@ -35,8 +35,9 @@ nav::-webkit-scrollbar{display:none}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;padding:20px}
 .modal-bg.aberto{display:flex}
 .modal{background:#0e1628;border:1px solid var(--borda);border-radius:14px;padding:28px 24px;max-width:420px;width:100%}
-.modal h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:6px}
-.modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.modal h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:12px}
+.modal h3{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--amarelo);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.modal p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
 .modal input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--borda);border-radius:6px;padding:10px 12px;color:var(--texto);font-size:14px;outline:none;margin-bottom:12px;font-family:'Barlow',sans-serif}
 .modal input:focus{border-color:var(--amarelo)}
 .modal-btns{display:flex;gap:8px}
@@ -219,14 +220,21 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
 <!-- ═══ API KEY MODAL ═══ -->
 <div class="modal-bg" id="modalApiKey">
   <div class="modal">
-    <h2>🔑 Configurar API Key</h2>
-    <p>Para buscar os placares automáticos, insira sua chave gratuita do <strong>football-data.org</strong>.<br>Cadastre em <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--amarelo)">football-data.org</a> e a chave chega por e-mail.</p>
-    <input type="text" id="inputApiKey" placeholder="Cole sua API Key aqui..." autocomplete="off">
-    <div class="modal-btns">
+    <h2>🔑 Configurar API Keys</h2>
+    <div class="modal-sec">
+      <h3>1. Placares em Tempo Real (football-data.org)</h3>
+      <p>Chave para sincronizar placares dos jogos da Copa 2026. Obtenha grátis em <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--amarelo)">football-data.org</a></p>
+      <input type="text" id="inputApiKey" placeholder="Cole a chave football-data.org aqui..." autocomplete="off">
+    </div>
+    <div class="modal-sec" style="margin-top:16px;border-top:1px solid var(--borda);padding-top:12px">
+      <h3>2. Histórico de Confrontos (API-Football)</h3>
+      <p>Chave para carregar os históricos completos de confrontos. Obtenha grátis em <a href="https://dashboard.api-football.com/register" target="_blank" style="color:var(--amarelo)">api-football.com</a></p>
+      <input type="text" id="inputApiFootballKey" placeholder="Cole a chave API-Football aqui..." autocomplete="off">
+    </div>
+    <div class="modal-btns" style="margin-top:16px">
       <button class="btn-sec" onclick="fecharModal()">Depois</button>
       <button class="btn-pri" onclick="salvarApiKey()">✓ Salvar e Conectar</button>
     </div>
-    <p class="modal-link">Plano gratuito inclui Copa do Mundo 2026 ✓</p>
   </div>
 </div>
 
@@ -282,9 +290,14 @@ const COMP_ID    = 2000; // FIFA World Cup (football-data.org)
 const SK_KEY     = 'copa2026_apikey';
 const SK_PLACARES= 'copa2026_placares_v2';
 const SK_H2H     = 'copa2026_h2h_cache';
+const SK_APIFOOTBALL_KEY = 'copa2026_apifootball_key';
+const SK_APIFOOTBALL_IDS = 'copa2026_apifootball_ids';
 const INTERVAL   = 5 * 60 * 1000; // 5 min
 
 let apiKey = localStorage.getItem(SK_KEY) || 'f4cfa71aa4ea4cee89bbbb159f06b339';
+let apiFootballKey = localStorage.getItem(SK_APIFOOTBALL_KEY) || '';
+let apiFootballIds = {};
+try { apiFootballIds = JSON.parse(localStorage.getItem(SK_APIFOOTBALL_IDS)||'{}'); } catch(e){}
 let placares = {};
 try { placares = JSON.parse(localStorage.getItem(SK_PLACARES)||'{}'); } catch(e){}
 let h2hCache = {};
@@ -464,6 +477,7 @@ function setStatus(estado, msg) {
 // ════════════════════════════════════════════════════════
 function abrirModal() {
   document.getElementById('inputApiKey').value = apiKey;
+  document.getElementById('inputApiFootballKey').value = apiFootballKey;
   document.getElementById('modalApiKey').classList.add('aberto');
 }
 function fecharModal() {
@@ -471,9 +485,14 @@ function fecharModal() {
 }
 function salvarApiKey() {
   const v = document.getElementById('inputApiKey').value.trim();
-  if (!v) return;
+  const f = document.getElementById('inputApiFootballKey').value.trim();
+  
   apiKey = v;
   localStorage.setItem(SK_KEY, v);
+  
+  apiFootballKey = f;
+  localStorage.setItem(SK_APIFOOTBALL_KEY, f);
+  
   fecharModal();
   buscarDadosAPI();
 }
@@ -1024,6 +1043,115 @@ function abrirWpp(i) {
 // ════════════════════════════════════════════════════════
 // H2H — Histórico de confrontos
 // ════════════════════════════════════════════════════════
+const NOME_PORT_PARA_ENG = {
+  'argelia': 'Algeria',
+  'argentina': 'Argentina',
+  'australia': 'Australia',
+  'austria': 'Austria',
+  'belgica': 'Belgium',
+  'bosniaeherz': 'Bosnia-Herzegovina',
+  'brasil': 'Brazil',
+  'canada': 'Canada',
+  'caboverde': 'Cape Verde Islands',
+  'colombia': 'Colombia',
+  'rdcongo': 'Congo DR',
+  'croacia': 'Croatia',
+  'curacao': 'Curaçao',
+  'tchequia': 'Czechia',
+  'equador': 'Ecuador',
+  'egito': 'Egypt',
+  'inglaterra': 'England',
+  'franca': 'France',
+  'alemanha': 'Germany',
+  'gana': 'Ghana',
+  'haiti': 'Haiti',
+  'ira': 'Iran',
+  'iraque': 'Iraq',
+  'costadomarfim': 'Ivory Coast',
+  'japao': 'Japan',
+  'jordania': 'Jordan',
+  'mexico': 'Mexico',
+  'marrocos': 'Morocco',
+  'holanda': 'Netherlands',
+  'novazelandia': 'New Zealand',
+  'noruega': 'Norway',
+  'panama': 'Panama',
+  'paraguai': 'Paraguay',
+  'portugal': 'Portugal',
+  'catar': 'Qatar',
+  'arabiasaudita': 'Saudi Arabia',
+  'escocia': 'Scotland',
+  'senegal': 'Senegal',
+  'africadosul': 'South Africa',
+  'coreiadosul': 'South Korea',
+  'espanha': 'Spain',
+  'suecia': 'Sweden',
+  'suica': 'Switzerland',
+  'tunisia': 'Tunisia',
+  'turkey': 'Turkey',
+  'estadosunidos': 'United States',
+  'uruguai': 'Uruguay',
+  'uzbequistao': 'Uzbekistan'
+};
+
+async function fetchAPIFootball(endpoint) {
+  const usarProxy = window.location.protocol !== 'file:';
+  let url = `https://v3.football.api-sports.io${endpoint}`;
+  if (usarProxy) {
+    url = `/api/proxy?provider=apifootball&endpoint=${encodeURIComponent(endpoint)}`;
+  }
+  return fetch(url, {
+    headers: { 'X-Api-Sports-Key': apiFootballKey }
+  });
+}
+
+function adaptarDadosAPIFootball(responseList, id1, id2, t1, t2) {
+  let homeWins = 0;
+  let awayWins = 0;
+  let total = responseList.length;
+  
+  const matchesAdapted = responseList.map(m => {
+    const homeTeamId = m.teams.home.id;
+    const isHomeT1 = homeTeamId === id1;
+    
+    const homeWon = m.teams.home.winner;
+    const awayWon = m.teams.away.winner;
+    
+    if (homeWon) {
+      if (isHomeT1) homeWins++;
+      else awayWins++;
+    } else if (awayWon) {
+      if (isHomeT1) awayWins++;
+      else homeWins++;
+    }
+    
+    const homeLocalName = isHomeT1 ? t1 : t2;
+    const awayLocalName = isHomeT1 ? t2 : t1;
+    
+    return {
+      utcDate: m.fixture.date,
+      competition: { name: m.league.name },
+      homeTeam: { name: homeLocalName },
+      awayTeam: { name: awayLocalName },
+      score: {
+        fullTime: {
+          home: m.goals.home,
+          away: m.goals.away
+        }
+      }
+    };
+  });
+  
+  return {
+    aggregates: {
+      numberOfMatches: total,
+      homeTeam: { wins: homeWins },
+      awayTeam: { wins: awayWins }
+    },
+    matches: matchesAdapted
+  };
+}
+
 async function abrirH2H(jogoId, t1, t2) {
   if (!t1 || !t2 || t1==='?' || t2==='?') return;
   document.getElementById('h2hTitle').textContent = `${t1} × ${t2}`;
@@ -1040,28 +1168,81 @@ async function abrirH2H(jogoId, t1, t2) {
     return;
   }
 
-  if (!apiKey) {
-    document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Configure a API Key para ver o histórico de confrontos.</div>';
-    return;
-  }
+  if (apiFootballKey) {
+    try {
+      const norm1 = normalizarNome(t1);
+      const norm2 = normalizarNome(t2);
+      const engName1 = NOME_PORT_PARA_ENG[norm1] || t1;
+      const engName2 = NOME_PORT_PARA_ENG[norm2] || t2;
 
-  // Buscar ID do jogo na API para pegar o H2H
-  const p = placares[jogoId];
-  const apiId = p?.apiId;
-  if (!apiId) {
-    document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Histórico disponível após o início da competição.</div>';
-    return;
-  }
+      let id1 = apiFootballIds[norm1];
+      let id2 = apiFootballIds[norm2];
 
-  try {
-    const resp = await fetchAPI(`/matches/${apiId}/head2head?limit=10`);
-    if (!resp.ok) throw new Error('API error');
-    const data = await resp.json();
-    h2hCache[cacheKey] = { data: data, ts: agora };
-    localStorage.setItem(SK_H2H, JSON.stringify(h2hCache));
-    renderH2H(data, t1, t2);
-  } catch(e) {
-    document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Não foi possível carregar o histórico agora.</div>';
+      if (!id1) {
+        const resp1 = await fetchAPIFootball(`/teams?name=${encodeURIComponent(engName1)}`);
+        if (!resp1.ok) throw new Error(`Status ${resp1.status}`);
+        const data1 = await resp1.json();
+        const list1 = data1.response || [];
+        if (list1.length > 0) {
+          id1 = list1[0].team.id;
+          apiFootballIds[norm1] = id1;
+        } else {
+          throw new Error(`Time não encontrado: ${engName1}`);
+        }
+      }
+
+      if (!id2) {
+        const resp2 = await fetchAPIFootball(`/teams?name=${encodeURIComponent(engName2)}`);
+        if (!resp2.ok) throw new Error(`Status ${resp2.status}`);
+        const data2 = await resp2.json();
+        const list2 = data2.response || [];
+        if (list2.length > 0) {
+          id2 = list2[0].team.id;
+          apiFootballIds[norm2] = id2;
+        } else {
+          throw new Error(`Time não encontrado: ${engName2}`);
+        }
+      }
+
+      localStorage.setItem(SK_APIFOOTBALL_IDS, JSON.stringify(apiFootballIds));
+
+      const h2hResp = await fetchAPIFootball(`/fixtures/headtohead?h2h=${id1}-${id2}`);
+      if (!h2hResp.ok) throw new Error(`Status H2H ${h2hResp.status}`);
+      const h2hData = await h2hResp.json();
+      
+      const dataAdaptada = adaptarDadosAPIFootball(h2hData.response || [], id1, id2, t1, t2);
+
+      h2hCache[cacheKey] = { data: dataAdaptada, ts: agora };
+      localStorage.setItem(SK_H2H, JSON.stringify(h2hCache));
+      renderH2H(dataAdaptada, t1, t2);
+
+    } catch (err) {
+      console.error("Erro API-Football:", err);
+      document.getElementById('h2hContent').innerHTML = `<div class="h2h-erro">Não foi possível carregar o histórico via API-Football. (${err.message})</div>`;
+    }
+  } else {
+    if (!apiKey) {
+      document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Configure a API Key para ver o histórico de confrontos.</div>';
+      return;
+    }
+
+    const p = placares[jogoId];
+    const apiId = p?.apiId;
+    if (!apiId) {
+      document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Histórico disponível após o início da competição.</div>';
+      return;
+    }
+
+    try {
+      const resp = await fetchAPI(`/matches/${apiId}/head2head?limit=10`);
+      if (!resp.ok) throw new Error('API error');
+      const data = await resp.json();
+      h2hCache[cacheKey] = { data: data, ts: agora };
+      localStorage.setItem(SK_H2H, JSON.stringify(h2hCache));
+      renderH2H(data, t1, t2);
+    } catch(e) {
+      document.getElementById('h2hContent').innerHTML = '<div class="h2h-erro">Não foi possível carregar o histórico agora.</div>';
+    }
   }
 }
 
