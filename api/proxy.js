@@ -3,7 +3,7 @@ const https = require('https');
 module.exports = (req, res) => {
   // CORS Headers so client can call it
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Auth-Token, Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Auth-Token, X-Api-Sports-Key, Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
   if (req.method === 'OPTIONS') {
@@ -11,20 +11,28 @@ module.exports = (req, res) => {
     return;
   }
 
-  const { endpoint } = req.query;
+  const { endpoint, provider } = req.query;
   
   if (!endpoint) {
     res.status(400).json({ error: 'Endpoint query param is required' });
     return;
   }
 
-  const token = req.headers['x-auth-token'];
-  const targetUrl = `https://api.football-data.org/v4${endpoint}`;
+  let targetUrl;
+  let headers = {};
+
+  if (provider === 'apifootball') {
+    targetUrl = `https://v3.football.api-sports.io${endpoint}`;
+    const key = req.headers['x-api-sports-key'];
+    headers['x-apisports-key'] = key || '';
+  } else {
+    targetUrl = `https://api.football-data.org/v4${endpoint}`;
+    const token = req.headers['x-auth-token'];
+    headers['X-Auth-Token'] = token || '';
+  }
 
   const options = {
-    headers: {
-      'X-Auth-Token': token || ''
-    }
+    headers: headers
   };
 
   https.get(targetUrl, options, (apiRes) => {

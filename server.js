@@ -5,7 +5,6 @@ const path = require('path');
 const { exec } = require('child_process');
 
 const PORT = 3000;
-const API_BASE = 'https://api.football-data.org/v4';
 
 const server = http.createServer((req, res) => {
   const urlObj = new URL(req.url, `http://${req.headers.host}`);
@@ -13,21 +12,28 @@ const server = http.createServer((req, res) => {
   // CORS Proxy Endpoint
   if (urlObj.pathname === '/api/proxy') {
     const endpoint = urlObj.searchParams.get('endpoint');
+    const provider = urlObj.searchParams.get('provider');
     if (!endpoint) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Endpoint query param is required' }));
       return;
     }
     
-    const token = req.headers['x-auth-token'];
-    
-    // Construct the external API URL
-    const targetUrl = `${API_BASE}${endpoint}`;
+    let targetUrl;
+    let headers = {};
+
+    if (provider === 'apifootball') {
+      targetUrl = `https://v3.football.api-sports.io${endpoint}`;
+      const key = req.headers['x-api-sports-key'];
+      headers['x-apisports-key'] = key || '';
+    } else {
+      targetUrl = `https://api.football-data.org/v4${endpoint}`;
+      const token = req.headers['x-auth-token'];
+      headers['X-Auth-Token'] = token || '';
+    }
     
     const options = {
-      headers: {
-        'X-Auth-Token': token || ''
-      }
+      headers: headers
     };
     
     https.get(targetUrl, options, (apiRes) => {
