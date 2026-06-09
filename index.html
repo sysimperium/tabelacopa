@@ -539,7 +539,7 @@ function processarPartidas(matches) {
     const novoG1 = s?.home ?? null;
     const novoG2 = s?.away ?? null;
 
-    if (anterior.g1 !== novoG1 || anterior.g2 !== novoG2 || anterior.status !== novoStatus) {
+    if (anterior.g1 !== novoG1 || anterior.g2 !== novoG2 || anterior.status !== novoStatus || !anterior.apiId) {
       placares[id] = { g1: novoG1, g2: novoG2, status: novoStatus, apiId: m.id };
       atualizou = true;
     }
@@ -551,11 +551,63 @@ function processarPartidas(matches) {
   renderTudo();
 }
 
+const MAPA_TIMES = {
+  'algeria': 'argelia',
+  'argentina': 'argentina',
+  'australia': 'australia',
+  'austria': 'austria',
+  'belgium': 'belgica',
+  'bosniaherzegovina': 'bosniaeherz',
+  'brazil': 'brasil',
+  'canada': 'canada',
+  'capeverdeislands': 'caboverde',
+  'colombia': 'colombia',
+  'congodr': 'rdcongo',
+  'croatia': 'croacia',
+  'curacao': 'curacao',
+  'czechia': 'tchequia',
+  'ecuador': 'equador',
+  'egypt': 'egito',
+  'england': 'inglaterra',
+  'france': 'franca',
+  'germany': 'alemanha',
+  'ghana': 'gana',
+  'haiti': 'haiti',
+  'iran': 'ira',
+  'iraq': 'iraque',
+  'ivorycoast': 'costadomarfim',
+  'japan': 'japao',
+  'jordan': 'jordania',
+  'mexico': 'mexico',
+  'morocco': 'marrocos',
+  'netherlands': 'holanda',
+  'newzealand': 'novazelandia',
+  'norway': 'noruega',
+  'panama': 'panama',
+  'paraguay': 'paraguai',
+  'portugal': 'portugal',
+  'qatar': 'catar',
+  'saudiarabia': 'arabiasaudita',
+  'scotland': 'escocia',
+  'senegal': 'senegal',
+  'southafrica': 'africadosul',
+  'southkorea': 'coreiadosul',
+  'spain': 'espanha',
+  'sweden': 'suecia',
+  'switzerland': 'suica',
+  'tunisia': 'tunisia',
+  'turkey': 'turquia',
+  'unitedstates': 'estadosunidos',
+  'uruguay': 'uruguai',
+  'uzbekistan': 'uzbequistao'
+};
+
 function normalizarNome(nome) {
-  return nome.toLowerCase()
+  const norm = nome.toLowerCase()
     .replace(/\s+/g,'')
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z]/g,'');
+  return MAPA_TIMES[norm] || norm;
 }
 
 // ════════════════════════════════════════════════════════
