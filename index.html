@@ -170,7 +170,10 @@ table.ct tr:hover td{background:rgba(255,255,255,.03)}
 .h2h-jogo-item:last-child{border-bottom:none}
 .h2h-jogo-data{font-size:11px;color:var(--muted);min-width:60px}
 .h2h-jogo-comp{font-size:10px;color:rgba(232,234,240,.3);text-align:center;flex:1;padding:0 8px}
-.h2h-jogo-placar{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:50px;text-align:center}
+.h2h-jogo-placar{font-family:'Bebas Neue',sans-serif;font-size:18px;padding:3px 8px;border-radius:4px;min-width:55px;text-align:center;display:inline-block}
+.h2h-resultado-left{background:rgba(0,200,83,.15);color:#26e6a4;border:1px solid rgba(0,200,83,.3)}
+.h2h-resultado-right{background:rgba(229,57,53,.15);color:#ff6b6b;border:1px solid rgba(229,57,53,.3)}
+.h2h-resultado-draw{background:rgba(255,152,0,.15);color:#ffa726;border:1px solid rgba(255,152,0,.3)}
 .h2h-loading{text-align:center;padding:32px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px}
 .h2h-erro{text-align:center;padding:24px;color:var(--muted);font-size:13px}
 
@@ -1107,11 +1110,10 @@ function renderH2H(data, t1, t2) {
     const s = m.score?.fullTime;
     const g1 = s?.home ?? '?', g2 = s?.away ?? '?';
     const w = g1>g2?'left':g1<g2?'right':'draw';
-    const color = w==='left'?'var(--win)':w==='right'?'var(--lose)':'var(--draw)';
     html += `<div class="h2h-jogo-item">
       <span class="h2h-jogo-data">${data_m}</span>
       <span class="h2h-jogo-comp">${comp}</span>
-      <span class="h2h-jogo-placar" style="color:${color}">${g1} × ${g2}</span>
+      <span class="h2h-jogo-placar h2h-resultado-${w}">${g1} × ${g2}</span>
     </div>`;
   });
 
