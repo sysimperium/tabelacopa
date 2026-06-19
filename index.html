@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Copa do Mundo 2026 🇧🇷</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <style>
 :root{
   --verde:#009c3b;--amarelo:#FFDF00;--azul:#002776;
@@ -24,7 +26,7 @@ nav::-webkit-scrollbar{display:none}
 .nav-btn:hover{color:var(--texto)}
 
 /* ── STATUS BAR ── */
-#status-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 16px;background:rgba(0,200,83,.07);border-bottom:1px solid rgba(0,200,83,.15);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.5px;color:rgba(232,234,240,.55)}
+#status-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 16px;background:rgba(0,200,83,.07);border-bottom:1px solid rgba(0,200,83,.15);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.5px;color:rgba(232,234,240,.55)}
 #status-bar .dot{width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .4s}
 #status-bar .dot.ok{background:var(--win)}
 #status-bar .dot.err{background:var(--lose)}
@@ -100,7 +102,8 @@ nav::-webkit-scrollbar{display:none}
 .status-tag.ao-vivo{background:rgba(229,57,53,.2);color:#ef9a9a;animation:pulse 1.5s infinite}
 .status-tag.encerrado{background:rgba(0,200,83,.12);color:#69f0ae}
 .status-tag.agendado{background:rgba(255,255,255,.06);color:var(--muted)}
-.local-txt{font-size:10px;color:rgba(232,234,240,.25);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.local-txt{font-size:10px;color:rgba(232,234,240,.25);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;transition:color 0.2s;cursor:pointer}
+.local-txt:hover{color:var(--amarelo)!important;text-decoration:underline}
 
 /* ── GRUPOS CLASSIFICAÇÃO ── */
 .grupos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin-top:8px}
@@ -193,7 +196,8 @@ table.ct tr:hover td{background:rgba(255,255,255,.03)}
 .bjg-placar{display:flex;align-items:center;gap:6px}
 .bjg-num{font-family:'Bebas Neue',sans-serif;font-size:36px;min-width:36px;text-align:center}
 .bjg-x{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted)}
-.bjg-local{font-size:11px;color:var(--muted);text-align:center}
+.bjg-local{font-size:11px;color:var(--muted);text-align:center;transition:color 0.2s;cursor:pointer}
+.bjg-local:hover{color:var(--amarelo)!important;text-decoration:underline}
 .bjg-status{font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1.5px;text-transform:uppercase;text-align:center}
 
 /* ── WHATSAPP ── */
@@ -211,6 +215,307 @@ table.ct tr:hover td{background:rgba(255,255,255,.03)}
 .fab.vis{opacity:1;pointer-events:all}
 .api-cfg-btn{position:fixed;bottom:20px;left:16px;background:rgba(14,22,40,.9);border:1px solid var(--borda);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.5px;padding:8px 12px;border-radius:20px;cursor:pointer;z-index:200;display:flex;align-items:center;gap:5px;transition:all .2s}
 .api-cfg-btn:hover{border-color:var(--amarelo);color:var(--amarelo)}
+
+/* ── COMPARTIVO H2H STYLES ── */
+.h2h-stats-comparativo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--borda);
+}
+.h2h-stat-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.h2h-stat-lbl {
+  color: var(--muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.h2h-stat-val {
+  font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+}
+.h2h-stat-val.left {
+  color: var(--amarelo);
+}
+.h2h-stat-val.right {
+  color: var(--texto);
+}
+
+/* ── GLOBO LAYOUT & STYLES ── */
+.globo-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 16px;
+  height: 600px;
+  margin-top: 10px;
+}
+@media (max-width: 992px) {
+  .globo-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+.globo-painel-jogos, .globo-painel-sedes {
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+@media (max-width: 992px) {
+  .globo-painel-jogos, .globo-painel-sedes {
+    height: 350px;
+  }
+}
+.globo-painel-header {
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--borda);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.globo-painel-header h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--amarelo);
+  margin: 0;
+}
+.globo-select {
+  background: #080d1a;
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+.globo-lista-jogos, .globo-lista-sedes {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.globo-lista-jogos::-webkit-scrollbar, .globo-lista-sedes::-webkit-scrollbar {
+  width: 4px;
+}
+.globo-lista-jogos::-webkit-scrollbar-thumb, .globo-lista-sedes::-webkit-scrollbar-thumb {
+  background: var(--borda);
+  border-radius: 2px;
+}
+.globo-match-card {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.01);
+  margin-bottom: 6px;
+}
+.globo-match-card:hover {
+  background: rgba(255,223,0,0.04);
+  border-color: rgba(255,223,0,0.15);
+}
+.globo-match-card.active {
+  background: rgba(255,223,0,0.08);
+  border-color: var(--amarelo);
+}
+.globo-match-header {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.globo-match-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.globo-match-meta {
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.globo-sede-card {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.01);
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.globo-sede-card:hover {
+  background: rgba(0,200,83,0.04);
+  border-color: rgba(0,200,83,0.15);
+}
+.globo-sede-card.active {
+  background: rgba(0,200,83,0.08);
+  border-color: var(--verde);
+}
+.globo-sede-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto);
+}
+.globo-sede-details {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+.globo-mapa-wrapper {
+  background: radial-gradient(ellipse at center, #0e1628 0%, #080d1a 80%);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  height: 100%;
+}
+canvas#canvasGlobe {
+  display: block;
+  cursor: grab;
+}
+canvas#canvasGlobe:active {
+  cursor: grabbing;
+}
+.globo-stats-topo {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+.globo-stat-pill {
+  background: rgba(8,13,26,0.8);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  padding: 4px 8px;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.globo-stat-pill .val {
+  font-weight: 700;
+  color: var(--amarelo);
+}
+.globo-stat-pill .lbl {
+  color: var(--muted);
+}
+.globo-legend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(8,13,26,0.8);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 10px;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.legend-row:last-child {
+  margin-bottom: 0;
+}
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.legend-label {
+  color: var(--muted);
+}
+.globo-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,13,26,0.85);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 10px;
+  color: var(--muted);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s;
+}
+.globo-hint.hidden {
+  opacity: 0;
+}
+.tooltip-globe {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(8,13,26,0.95);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  z-index: 50;
+  transform: translate(-50%, -115%);
+}
+.tooltip-globe.show {
+  opacity: 1;
+}
+.tooltip-teams {
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 2px;
+}
+.tooltip-info {
+  color: var(--muted);
+}
 
 footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15);letter-spacing:1px}
 </style>
@@ -258,8 +563,13 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
 
 <!-- ═══ STATUS BAR ═══ -->
 <div id="status-bar">
-  <div class="dot" id="statusDot"></div>
-  <span id="statusTxt">Inicializando...</span>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusTxt">Inicializando...</span>
+  </div>
+  <button id="btnFusoToggle" onclick="toggleFuso()" style="background:none;border:none;color:var(--amarelo);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;gap:4px">
+    🕒 FUSO: BRASÍLIA (BRT)
+  </button>
 </div>
 
 <!-- ═══ NAV ═══ -->
@@ -269,6 +579,7 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
   <button class="nav-btn" onclick="mudarTab('elim',this)">🏆 Eliminatórias</button>
   <button class="nav-btn" onclick="mudarTab('brasil',this)">🇧🇷 Brasil</button>
   <button class="nav-btn" onclick="mudarTab('wpp',this)">📲 WhatsApp</button>
+  <button class="nav-btn" onclick="mudarTab('globo',this)">🌐 Globo 3D</button>
 </nav>
 
 <div id="tab-jogos" class="tab ativo"><div id="jogos-container"><div style="text-align:center;padding:40px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">⏳ Carregando jogos...</div></div></div>
@@ -276,6 +587,61 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
 <div id="tab-elim" class="tab"><p class="slabel">Chaveamento — Fase Eliminatória</p><div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div></div>
 <div id="tab-brasil" class="tab"><div id="brasil-container"></div></div>
 <div id="tab-wpp" class="tab"><p class="slabel">Mensagens prontas para o grupo da família</p><div class="wpp-cards" id="wpp-container"></div></div>
+<div id="tab-globo" class="tab">
+  <div class="globo-layout">
+    <!-- Painel Esquerdo: Lista de jogos no Globo -->
+    <div class="globo-painel-jogos">
+      <div class="globo-painel-header">
+        <h3>Jogos no Globo</h3>
+        <select id="selectGrupoGlobo" onchange="alterarGrupoGlobo()" class="globo-select">
+          <option value="A">Grupo A</option>
+          <option value="B">Grupo B</option>
+          <option value="C">Grupo C</option>
+          <option value="D">Grupo D</option>
+          <option value="E">Grupo E</option>
+          <option value="F">Grupo F</option>
+          <option value="G">Grupo G</option>
+          <option value="H">Grupo H</option>
+          <option value="I">Grupo I</option>
+          <option value="J">Grupo J</option>
+          <option value="K">Grupo K</option>
+          <option value="L">Grupo L</option>
+        </select>
+      </div>
+      <div id="listaJogosGlobo" class="globo-lista-jogos"></div>
+    </div>
+
+    <!-- Área Central: O Globo 3D -->
+    <div class="globo-mapa-wrapper">
+      <div class="globo-stats-topo">
+        <div class="globo-stat-pill"><span class="val">48</span><span class="lbl">Seleções</span></div>
+        <div class="globo-stat-pill"><span class="val">16</span><span class="lbl">Cidades</span></div>
+        <div class="globo-stat-pill"><span class="val">3</span><span class="lbl">Países Sedes</span></div>
+      </div>
+      <canvas id="canvasGlobe"></canvas>
+      <div class="globo-legend">
+        <div class="legend-row"><div class="legend-dot" style="background:#4f80ff"></div><span class="legend-label">Sede do jogo</span></div>
+        <div class="legend-row"><div class="legend-dot" style="background:#f5c842"></div><span class="legend-label">País selecionado</span></div>
+        <div class="legend-row"><div class="legend-dot" style="background:#23d18b;height:2px;border-radius:1px"></div><span class="legend-label">Conexão ativa</span></div>
+      </div>
+      <div class="globo-hint" id="globeHint">
+        🌐 Arraste para girar · Passe o mouse sobre os jogos
+      </div>
+      <div class="tooltip-globe" id="globeTooltip">
+        <div class="tooltip-teams" id="ttTeams"></div>
+        <div class="tooltip-info" id="ttInfo"></div>
+      </div>
+    </div>
+
+    <!-- Painel Direito: Guia de Sedes -->
+    <div class="globo-painel-sedes">
+      <div class="globo-painel-header">
+        <h3>Guia de Sedes</h3>
+      </div>
+      <div class="globo-lista-sedes" id="listaSedesGlobo"></div>
+    </div>
+  </div>
+</div>
 
 <button class="fab" id="fabBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 <button class="api-cfg-btn" onclick="abrirModal()">⚙ API Key</button>
@@ -707,8 +1073,10 @@ function renderJogos() {
   const c = document.getElementById('jogos-container');
   const porDia = {};
   JOGOS.forEach(j => {
-    if(!porDia[j[1]]) porDia[j[1]]=[];
-    porDia[j[1]].push(j);
+    const formatado = obterDataHoraFormatada(j[1], j[2]);
+    const chaveDia = formatado.data;
+    if(!porDia[chaveDia]) porDia[chaveDia]=[];
+    porDia[chaveDia].push({ jogo: j, data: formatado.data, hora: formatado.hora });
   });
 
   const labels = ['','1ª Rodada','2ª Rodada','3ª Rodada'];
@@ -716,18 +1084,20 @@ function renderJogos() {
   let rodadaAtual = 0;
   const meses = ['','jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
-  Object.entries(porDia).forEach(([dia, jogos]) => {
-    const rodada = jogos[0][7];
+  Object.entries(porDia).forEach(([dia, itens]) => {
+    const rodada = itens[0].jogo[7];
     if (rodada !== rodadaAtual) {
       rodadaAtual = rodada;
       html += `<p class="slabel" style="margin-top:${rodada>1?'26px':'0'}">${labels[rodada]} · Fase de Grupos</p>`;
     }
     const [dd, sem] = dia.split(' ');
-    const mes = meses[parseInt(dd.split('/')[1])];
-    html += `<div class="dia-header"><span class="dia-nome">${sem}, ${dd} de ${mes}</span><span class="dia-data">Horário de Brasília</span></div><div class="dia-games">`;
+    const mes = meses[parseInt(dd.split('/')[1], 10)] || '';
+    html += `<div class="dia-header"><span class="dia-nome">${sem}, ${dd} de ${mes}</span><span class="dia-data">${usarFusoLocal ? 'Fuso Horário Local' : 'Horário de Brasília (BRT)'}</span></div><div class="dia-games">`;
 
-    jogos.forEach(j => {
-      const [id,,hora,t1,t2,local,grupo] = j;
+    itens.forEach(item => {
+      const j = item.jogo;
+      const [id,,horaOriginal,t1,t2,local,grupo] = j;
+      const hora = item.hora;
       const brasil = t1==='Brasil'||t2==='Brasil';
       const p = placares[id]||{};
       const status = p.status||'SCHEDULED';
@@ -761,7 +1131,7 @@ function renderJogos() {
         <div class="meio">
           ${statusHtml}
           ${placarHtml}
-          <span class="local-txt">${local}</span>
+          <span class="local-txt" onclick="irParaSedeNoGlobo(event, '${local}')" title="Ver no Globo 3D">📍 ${local}</span>
         </div>
         <div class="time-lado direita">
           <span class="time-flag">${FLAGS[t2]||'🏳'}</span>
@@ -1257,6 +1627,9 @@ function renderH2H(data, t1, t2) {
   const pct2 = total ? 100-pct1-pctE : 0;
   const matches = (data.matches||[]).slice(0,8);
 
+  const td1 = TEAM_DATA[t1] || { conf: '—', ranking: '—', wc: '—', appearances: '—' };
+  const td2 = TEAM_DATA[t2] || { conf: '—', ranking: '—', wc: '—', appearances: '—' };
+
   let html = `
   <div class="h2h-resumo">
     <div>
@@ -1280,6 +1653,32 @@ function renderH2H(data, t1, t2) {
     <div class="h2h-bar-e" style="width:${pctE}%"></div>
     <div class="h2h-bar-v2" style="width:${pct2}%"></div>
   </div>
+  
+  <!-- Comparativo das Seleções -->
+  <div class="h2h-stats-comparativo">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--amarelo);margin-bottom:4px;text-transform:uppercase">📋 Estatísticas Históricas</div>
+    <div class="h2h-stat-linha">
+      <span class="h2h-stat-val left">${td1.conf}</span>
+      <span class="h2h-stat-lbl">Confederação</span>
+      <span class="h2h-stat-val right">${td2.conf}</span>
+    </div>
+    <div class="h2h-stat-linha">
+      <span class="h2h-stat-val left">${td1.ranking > 0 ? td1.ranking + 'º' : '—'}</span>
+      <span class="h2h-stat-lbl">Ranking FIFA</span>
+      <span class="h2h-stat-val right">${td2.ranking > 0 ? td2.ranking + 'º' : '—'}</span>
+    </div>
+    <div class="h2h-stat-linha">
+      <span class="h2h-stat-val left">${td1.wc}</span>
+      <span class="h2h-stat-lbl">Títulos Mundiais</span>
+      <span class="h2h-stat-val right">${td2.wc}</span>
+    </div>
+    <div class="h2h-stat-linha">
+      <span class="h2h-stat-val left">${td1.appearances}</span>
+      <span class="h2h-stat-lbl">Participações</span>
+      <span class="h2h-stat-val right">${td2.appearances}</span>
+    </div>
+  </div>
+
   <div class="h2h-jogos-lista">`;
 
   if (!matches.length) {
@@ -1314,8 +1713,17 @@ function mudarTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('ativo'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('ativo'));
   document.getElementById('tab-'+tab).classList.add('ativo');
+  
+  if (!btn) {
+    btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${tab}'`));
+  }
   if(btn) btn.classList.add('ativo');
   window.scrollTo({top:0,behavior:'smooth'});
+  
+  if (tab === 'globo') {
+    inicializarGloboSeNecessario();
+    setTimeout(resizeGlobe, 50);
+  }
 }
 
 function renderTudo() {
@@ -1323,6 +1731,9 @@ function renderTudo() {
   renderGrupos();
   renderBracket();
   renderBrasil();
+  if (globeInicializado) {
+    alterarGrupoGlobo();
+  }
 }
 
 window.addEventListener('scroll',()=>{
@@ -1331,6 +1742,795 @@ window.addEventListener('scroll',()=>{
 
 // Fechar H2H com ESC
 document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharH2H();});
+
+// ════════════════════════════════════════════════════════
+// DATA & CONFIG FOR GLOBE & TIMEZONES
+// ════════════════════════════════════════════════════════
+let usarFusoLocal = false;
+
+function obterDataHoraFormatada(dataBRT, horaBRT) {
+  if (!usarFusoLocal) {
+    return { data: dataBRT, hora: horaBRT };
+  }
+  try {
+    const diaMes = dataBRT.split(' ')[0];
+    const [dia, mes] = diaMes.split('/').map(Number);
+    let hora = 0, minuto = 0;
+    if (horaBRT.includes('h')) {
+      const parts = horaBRT.split('h');
+      hora = parseInt(parts[0], 10);
+      minuto = parts[1] ? parseInt(parts[1], 10) : 0;
+    }
+    const dataUTC = new Date(Date.UTC(2026, mes - 1, dia, hora + 3, minuto));
+    
+    let sem = dataUTC.toLocaleDateString('pt-BR', { weekday: 'short' });
+    sem = sem.charAt(0).toUpperCase() + sem.slice(1).replace('.', '');
+    
+    const dd = String(dataUTC.getDate()).padStart(2, '0');
+    const mm = String(dataUTC.getMonth() + 1).padStart(2, '0');
+    const dataFormatada = `${dd}/${mm} ${sem}`;
+    
+    const hr = dataUTC.getHours();
+    const min = dataUTC.getMinutes();
+    const horaFormatada = min > 0 ? `${hr}h${String(min).padStart(2, '0')}` : `${hr}h`;
+    
+    return { data: dataFormatada, hora: horaFormatada };
+  } catch (e) {
+    return { data: dataBRT, hora: horaBRT };
+  }
+}
+
+function toggleFuso() {
+  usarFusoLocal = !usarFusoLocal;
+  const btn = document.getElementById('btnFusoToggle');
+  btn.textContent = usarFusoLocal ? '🕒 FUSO: LOCAL' : '🕒 FUSO: BRASÍLIA (BRT)';
+  renderTudo();
+}
+
+function irParaSedeNoGlobo(event, nomeSede) {
+  event.stopPropagation();
+  mudarTab('globo');
+  
+  const idx = SEDES_DATA.findIndex(s => s.nome === nomeSede);
+  if (idx !== -1) {
+    setTimeout(() => {
+      selecionarSedeGlobo(nomeSede, idx);
+    }, 100);
+  }
+}
+
+const TEAM_DATA = {
+  'Argentina': { conf: 'CONMEBOL', ranking: 1, wc: 3, appearances: 18 },
+  'França': { conf: 'UEFA', ranking: 2, wc: 2, appearances: 16 },
+  'Espanha': { conf: 'UEFA', ranking: 3, wc: 1, appearances: 16 },
+  'Inglaterra': { conf: 'UEFA', ranking: 4, wc: 1, appearances: 16 },
+  'Brasil': { conf: 'CONMEBOL', ranking: 5, wc: 5, appearances: 22 },
+  'Holanda': { conf: 'UEFA', ranking: 7, wc: 0, appearances: 11 },
+  'Portugal': { conf: 'UEFA', ranking: 8, wc: 0, appearances: 8 },
+  'Alemanha': { conf: 'UEFA', ranking: 11, wc: 4, appearances: 20 },
+  'Estados Unidos': { conf: 'CONCACAF', ranking: 16, wc: 0, appearances: 11 },
+  'México': { conf: 'CONCACAF', ranking: 17, wc: 0, appearances: 17 },
+  'Uruguai': { conf: 'CONMEBOL', ranking: 14, wc: 2, appearances: 14 },
+  'Colômbia': { conf: 'CONMEBOL', ranking: 12, wc: 0, appearances: 6 },
+  'Marrocos': { conf: 'CAF', ranking: 13, wc: 0, appearances: 6 },
+  'Japão': { conf: 'AFC', ranking: 18, wc: 0, appearances: 7 },
+  'Senegal': { conf: 'CAF', ranking: 19, wc: 0, appearances: 3 },
+  'Irã': { conf: 'AFC', ranking: 20, wc: 0, appearances: 6 },
+  'Suíça': { conf: 'UEFA', ranking: 15, wc: 0, appearances: 12 },
+  'Coreia do Sul': { conf: 'AFC', ranking: 22, wc: 0, appearances: 11 },
+  'Austrália': { conf: 'AFC', ranking: 24, wc: 0, appearances: 6 },
+  'Áustria': { conf: 'UEFA', ranking: 25, wc: 0, appearances: 7 },
+  'Suécia': { conf: 'UEFA', ranking: 28, wc: 0, appearances: 12 },
+  'Polônia': { conf: 'UEFA', ranking: 30, wc: 0, appearances: 9 },
+  'Equador': { conf: 'CONMEBOL', ranking: 31, wc: 0, appearances: 4 },
+  'Egito': { conf: 'CAF', ranking: 36, wc: 0, appearances: 3 },
+  'Tunísia': { conf: 'CAF', ranking: 41, wc: 0, appearances: 6 },
+  'Argélia': { conf: 'CAF', ranking: 44, wc: 0, appearances: 4 },
+  'Noruega': { conf: 'UEFA', ranking: 47, wc: 0, appearances: 3 },
+  'Turquia': { conf: 'UEFA', ranking: 40, wc: 0, appearances: 2 },
+  'Tchequia': { conf: 'UEFA', ranking: 38, wc: 0, appearances: 9 },
+  'Escócia': { conf: 'UEFA', ranking: 39, wc: 0, appearances: 8 },
+  'Paraguai': { conf: 'CONMEBOL', ranking: 56, wc: 0, appearances: 8 },
+  'Costa do Marfim': { conf: 'CAF', ranking: 38, wc: 0, appearances: 3 },
+  'África do Sul': { conf: 'CAF', ranking: 59, wc: 0, appearances: 3 },
+  'Bósnia e Herz.': { conf: 'UEFA', ranking: 74, wc: 0, appearances: 1 },
+  'Cabo Verde': { conf: 'CAF', ranking: 65, wc: 0, appearances: 0 },
+  'Gana': { conf: 'CAF', ranking: 68, wc: 0, appearances: 4 },
+  'Uzbequistão': { conf: 'AFC', ranking: 64, wc: 0, appearances: 0 },
+  'Jordânia': { conf: 'AFC', ranking: 71, wc: 0, appearances: 0 },
+  'Iraque': { conf: 'AFC', ranking: 58, wc: 0, appearances: 1 },
+  'Catar': { conf: 'AFC', ranking: 35, wc: 0, appearances: 1 },
+  'Arábia Saudita': { conf: 'AFC', ranking: 53, wc: 0, appearances: 6 },
+  'RD Congo': { conf: 'CAF', ranking: 62, wc: 0, appearances: 1 },
+  'Nova Zelândia': { conf: 'OFC', ranking: 107, wc: 0, appearances: 2 },
+  'Panamá': { conf: 'CONCACAF', ranking: 45, wc: 0, appearances: 1 },
+  'Canadá': { conf: 'CONCACAF', ranking: 48, wc: 0, appearances: 2 },
+  'Curaçao': { conf: 'CONCACAF', ranking: 90, wc: 0, appearances: 0 },
+  'Haiti': { conf: 'CONCACAF', ranking: 86, wc: 0, appearances: 1 }
+};
+
+const COORDENADAS_SEDES = {
+  'Cidade do México': [19.4326, -99.1332],
+  'Guadalajara': [20.6597, -103.3496],
+  'Monterrey': [25.6866, -100.3161],
+  'Toronto': [43.6532, -79.3832],
+  'Vancouver': [49.2827, -123.1207],
+  'Seattle': [47.6062, -122.3321],
+  'San Francisco': [37.7749, -122.4194],
+  'Los Angeles': [34.0522, -118.2437],
+  'Houston': [29.7604, -95.3698],
+  'Dallas': [32.7767, -96.7970],
+  'Kansas City': [39.0997, -94.5786],
+  'Atlanta': [33.7490, -84.3880],
+  'Miami': [25.7617, -80.1918],
+  'Boston': [42.3601, -71.0589],
+  'Filadélfia': [39.9526, -75.1652],
+  'Nova York/NJ': [40.7128, -74.0060]
+};
+
+const COORDENADAS_PAISES = {
+  'México': [19.4326, -99.1332],
+  'África do Sul': [-30.5595, 22.9375],
+  'Coreia do Sul': [35.9078, 127.7669],
+  'Tchequia': [49.8175, 15.4730],
+  'Canadá': [56.1304, -106.3468],
+  'Catar': [25.3548, 51.1839],
+  'Suíça': [46.8182, 8.2275],
+  'Bósnia e Herz.': [43.9159, 17.6791],
+  'Brasil': [-14.2350, -51.9253],
+  'Marrocos': [31.7917, -7.0926],
+  'Haiti': [18.9712, -72.2852],
+  'Escócia': [56.4907, -4.2026],
+  'Estados Unidos': [37.0902, -95.7129],
+  'Paraguai': [-23.4425, -58.4438],
+  'Austrália': [-25.2744, 133.7751],
+  'Turquia': [38.9637, 35.2433],
+  'Alemanha': [51.1657, 10.4515],
+  'Curaçao': [12.1696, -68.9900],
+  'Costa do Marfim': [7.5400, -5.5471],
+  'Equador': [-1.8312, -78.1834],
+  'Holanda': [52.1326, 5.2913],
+  'Japão': [36.2048, 138.2529],
+  'Tunísia': [33.8869, 9.5375],
+  'Suécia': [60.1282, 18.6435],
+  'Bélgica': [50.5039, 4.4699],
+  'Egito': [26.8206, 30.8025],
+  'Irã': [32.4279, 53.6880],
+  'Nova Zelândia': [-40.9006, 174.8860],
+  'Espanha': [40.4637, -3.7492],
+  'Cabo Verde': [16.0021, -24.0132],
+  'Arábia Saudita': [23.8859, 45.0792],
+  'Uruguai': [-32.5228, -55.7658],
+  'França': [46.2276, 2.2137],
+  'Senegal': [14.4974, -14.4524],
+  'Noruega': [60.4720, 8.4689],
+  'Iraque': [33.2232, 43.6793],
+  'Argentina': [-38.4161, -63.6167],
+  'Argélia': [28.0339, 1.6596],
+  'Áustria': [47.5162, 14.5501],
+  'Jordânia': [30.5852, 36.2384],
+  'Portugal': [39.3999, -8.2245],
+  'Uzbequistão': [41.3775, 64.5853],
+  'Colômbia': [4.5709, -74.2973],
+  'RD Congo': [-4.0383, 21.7587],
+  'Inglaterra': [52.3555, -1.1743],
+  'Croácia': [45.1000, 15.2000],
+  'Gana': [7.9465, -1.0232],
+  'Panamá': [8.5380, -80.7821]
+};
+
+const SEDES_DATA = [
+  { nome: 'Vancouver', pais: 'Canadá 🇨🇦', estadio: 'BC Place', cap: '54.500', lat: 49.2827, lon: -123.1207 },
+  { nome: 'Toronto', pais: 'Canadá 🇨🇦', estadio: 'BMO Field', cap: '45.000', lat: 43.6532, lon: -79.3832 },
+  { nome: 'Guadalajara', pais: 'México 🇲🇽', estadio: 'Estádio Akron', cap: '48.000', lat: 20.6597, lon: -103.3496 },
+  { nome: 'Cidade do México', pais: 'México 🇲🇽', estadio: 'Estádio Azteca', cap: '87.500', lat: 19.4326, lon: -99.1332 },
+  { nome: 'Monterrey', pais: 'México 🇲🇽', estadio: 'Estádio BBVA', cap: '53.500', lat: 25.6866, lon: -100.3161 },
+  { nome: 'Seattle', pais: 'EUA 🇺🇸', estadio: 'Lumen Field', cap: '69.000', lat: 47.6062, lon: -122.3321 },
+  { nome: 'San Francisco', pais: 'EUA 🇺🇸', estadio: 'Levi\'s Stadium', cap: '68.500', lat: 37.7749, lon: -122.4194 },
+  { nome: 'Los Angeles', pais: 'EUA 🇺🇸', estadio: 'SoFi Stadium', cap: '70.200', lat: 34.0522, lon: -118.2437 },
+  { nome: 'Houston', pais: 'EUA 🇺🇸', estadio: 'NRG Stadium', cap: '72.200', lat: 29.7604, lon: -95.3698 },
+  { nome: 'Dallas', pais: 'EUA 🇺🇸', estadio: 'AT&T Stadium', cap: '80.000', lat: 32.7767, lon: -96.7970 },
+  { nome: 'Kansas City', pais: 'EUA 🇺🇸', estadio: 'Arrowhead Stadium', cap: '76.400', lat: 39.0997, lon: -94.5786 },
+  { nome: 'Atlanta', pais: 'EUA 🇺🇸', estadio: 'Mercedes-Benz Stadium', cap: '71.000', lat: 33.7490, lon: -84.3880 },
+  { nome: 'Miami', pais: 'EUA 🇺🇸', estadio: 'Hard Rock Stadium', cap: '64.700', lat: 25.7617, lon: -80.1918 },
+  { nome: 'Boston', pais: 'EUA 🇺🇸', estadio: 'Gillette Stadium', cap: '65.800', lat: 42.3601, lon: -71.0589 },
+  { nome: 'Filadélfia', pais: 'EUA 🇺🇸', estadio: 'Lincoln Financial Field', cap: '67.500', lat: 39.9526, lon: -75.1652 },
+  { nome: 'Nova York/NJ', pais: 'EUA 🇺🇸', estadio: 'MetLife Stadium', cap: '82.500', lat: 40.7128, lon: -74.0060 }
+];
+
+// ════════════════════════════════════════════════════════
+// INTERACTIVE GLOBE LOGIC
+// ════════════════════════════════════════════════════════
+let globeInicializado = false;
+let canvasGlobe, ctxGlobe;
+let WGlobe, HGlobe, radiusGlobe;
+let rotationGlobe = [90, -35];
+let draggingGlobe = false;
+let dragStartGlobe = null;
+let rotStartGlobe = null;
+let autoRotateGlobe = true;
+let connectionGlobe = null;
+let worldGeoGlobe = null;
+let arcProgressGlobe = 0;
+let arcTargetGlobe = 0;
+let arcAnimGlobe = null;
+let activeMatchGlobeKey = null;
+let activeSedeGlobeName = null;
+let hoveredMatchGlobe = null;
+let lastTimeGlobe = 0;
+let requestAnimIdGlobe = null;
+let temporizadorHoverGlobe = null;
+
+const starsGlobe = [];
+for (let i = 0; i < 100; i++) {
+  starsGlobe.push({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.0 + 0.2,
+    a: Math.random() * 0.4 + 0.1
+  });
+}
+
+function projectGlobe(lat, lon) {
+  const lambda = (lon + rotationGlobe[0]) * Math.PI / 180;
+  const phi = lat * Math.PI / 180;
+  const sinPhi = Math.sin(phi);
+  const cosPhi = Math.cos(phi);
+  const cosLambda = Math.cos(lambda);
+  const x = radiusGlobe * cosPhi * Math.sin(lambda);
+  const y = -radiusGlobe * sinPhi;
+  const dot = cosPhi * cosLambda;
+  return { x: WGlobe / 2 + x, y: HGlobe / 2 + y, visible: dot > 0 };
+}
+
+function greatCirclePointsGlobe(lat1, lon1, lat2, lon2, n = 100) {
+  const pts = [];
+  const toRad = x => x * Math.PI / 180;
+  const toDeg = x => x * 180 / Math.PI;
+  const f1 = toRad(lat1), l1 = toRad(lon1), f2 = toRad(lat2), l2 = toRad(lon2);
+  const dLon = l2 - l1;
+  const d = 2 * Math.asin(Math.sqrt(Math.sin((f2 - f1) / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dLon / 2) ** 2));
+  
+  if (d < 0.0001) {
+    return [[lon1, lat1], [lon2, lat2]];
+  }
+
+  for (let i = 0; i <= n; i++) {
+    const f = i / n;
+    const A = Math.sin((1 - f) * d) / Math.sin(d);
+    const B = Math.sin(f * d) / Math.sin(d);
+    const x = A * Math.cos(f1) * Math.cos(l1) + B * Math.cos(f2) * Math.cos(l2);
+    const y = A * Math.cos(f1) * Math.sin(l1) + B * Math.cos(f2) * Math.sin(l2);
+    const z = A * Math.sin(f1) + B * Math.sin(f2);
+    pts.push([toDeg(Math.atan2(y, x)), toDeg(Math.atan2(z, Math.sqrt(x * x + y * y)))]);
+  }
+  return pts;
+}
+
+function animateArcGlobe(to) {
+  if (arcAnimGlobe) cancelAnimationFrame(arcAnimGlobe);
+  const from = arcProgressGlobe;
+  const start = performance.now();
+  const dur = 600;
+  function step(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    arcProgressGlobe = from + (to - from) * ease;
+    drawGlobeCanvas();
+    if (p < 1) arcAnimGlobe = requestAnimationFrame(step);
+  }
+  arcAnimGlobe = requestAnimationFrame(step);
+}
+
+function highlightConnectionGlobe(match, show) {
+  if (show && match) {
+    connectionGlobe = match;
+    arcTargetGlobe = 1;
+    animateArcGlobe(1);
+    if (autoRotateGlobe) rotateToMatchGlobe(match);
+  } else {
+    connectionGlobe = null;
+    arcTargetGlobe = 0;
+    animateArcGlobe(0);
+  }
+}
+
+function rotateToMatchGlobe(m) {
+  const coords1 = COORDENADAS_PAISES[m[3]];
+  const coords2 = COORDENADAS_PAISES[m[4]];
+  if (!coords1 || !coords2) return;
+  const midLat = (coords1[0] + coords2[0]) / 2;
+  const midLon = (coords1[1] + coords2[1]) / 2;
+  
+  const targetRot = [-midLon, -midLat / 2];
+  const startRot = [...rotationGlobe];
+  const dur = 900;
+  const start = performance.now();
+  
+  function step(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    rotationGlobe[0] = startRot[0] + (targetRot[0] - startRot[0]) * ease;
+    rotationGlobe[1] = startRot[1] + (targetRot[1] - startRot[1]) * ease;
+    drawGlobeCanvas();
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function rotateToSedeGlobe(s) {
+  const targetRot = [-s.lon, -s.lat / 2];
+  const startRot = [...rotationGlobe];
+  const dur = 900;
+  const start = performance.now();
+  
+  function step(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    rotationGlobe[0] = startRot[0] + (targetRot[0] - startRot[0]) * ease;
+    rotationGlobe[1] = startRot[1] + (targetRot[1] - startRot[1]) * ease;
+    drawGlobeCanvas();
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function drawGlobeCanvas() {
+  if (!canvasGlobe || !ctxGlobe) return;
+  
+  ctxGlobe.clearRect(0, 0, WGlobe, HGlobe);
+
+  starsGlobe.forEach(s => {
+    ctxGlobe.beginPath();
+    ctxGlobe.arc(s.x * WGlobe, s.y * HGlobe, s.r, 0, Math.PI * 2);
+    ctxGlobe.fillStyle = `rgba(255,255,255,${s.a})`;
+    ctxGlobe.fill();
+  });
+
+  const grd = ctxGlobe.createRadialGradient(WGlobe / 2, HGlobe / 2, radiusGlobe * 0.9, WGlobe / 2, HGlobe / 2, radiusGlobe * 1.15);
+  grd.addColorStop(0, 'rgba(0,39,118,0.08)');
+  grd.addColorStop(1, 'rgba(0,0,0,0)');
+  ctxGlobe.beginPath();
+  ctxGlobe.arc(WGlobe / 2, HGlobe / 2, radiusGlobe * 1.15, 0, Math.PI * 2);
+  ctxGlobe.fillStyle = grd;
+  ctxGlobe.fill();
+
+  const ocean = ctxGlobe.createRadialGradient(WGlobe / 2 - radiusGlobe * 0.2, HGlobe / 2 - radiusGlobe * 0.2, 0, WGlobe / 2, HGlobe / 2, radiusGlobe);
+  ocean.addColorStop(0, '#0e1d3e');
+  ocean.addColorStop(0.6, '#080f24');
+  ocean.addColorStop(1, '#040814');
+  ctxGlobe.beginPath();
+  ctxGlobe.arc(WGlobe / 2, HGlobe / 2, radiusGlobe, 0, Math.PI * 2);
+  ctxGlobe.fillStyle = ocean;
+  ctxGlobe.fill();
+
+  ctxGlobe.save();
+  const geoProj = d3.geoOrthographic()
+    .scale(radiusGlobe)
+    .translate([WGlobe / 2, HGlobe / 2])
+    .rotate([rotationGlobe[0], rotationGlobe[1], 0])
+    .clipAngle(90);
+  const path = d3.geoPath().projection(geoProj).context(ctxGlobe);
+
+  const grat = d3.geoGraticule().step([20, 20])();
+  ctxGlobe.beginPath();
+  path(grat);
+  ctxGlobe.strokeStyle = 'rgba(255,223,0,0.06)';
+  ctxGlobe.lineWidth = 0.5;
+  ctxGlobe.stroke();
+
+  if (worldGeoGlobe) {
+    ctxGlobe.beginPath();
+    path(worldGeoGlobe);
+    ctxGlobe.fillStyle = '#0f1f45';
+    ctxGlobe.fill();
+    ctxGlobe.strokeStyle = 'rgba(0,156,59,0.2)';
+    ctxGlobe.lineWidth = 0.5;
+    ctxGlobe.stroke();
+  }
+  ctxGlobe.restore();
+
+  ctxGlobe.save();
+  const geoProjEquator = d3.geoOrthographic()
+    .scale(radiusGlobe)
+    .translate([WGlobe / 2, HGlobe / 2])
+    .rotate([rotationGlobe[0], rotationGlobe[1], 0])
+    .clipAngle(90);
+  const pathEquator = d3.geoPath().projection(geoProjEquator).context(ctxGlobe);
+  ctxGlobe.beginPath();
+  pathEquator({ type: "LineString", coordinates: Array.from({ length: 361 }, (_, i) => [i - 180, 0]) });
+  ctxGlobe.strokeStyle = 'rgba(255,223,0,0.08)';
+  ctxGlobe.lineWidth = 0.8;
+  ctxGlobe.stroke();
+  ctxGlobe.restore();
+
+  if (connectionGlobe && arcProgressGlobe > 0.01) {
+    const c1 = COORDENADAS_PAISES[connectionGlobe[3]];
+    const c2 = COORDENADAS_PAISES[connectionGlobe[4]];
+    if (c1 && c2) {
+      const pts = greatCirclePointsGlobe(c1[0], c1[1], c2[0], c2[1], 120);
+      const visible = [];
+      for (let i = 0; i < pts.length; i++) {
+        const p = projectGlobe(pts[i][1], pts[i][0]);
+        visible.push({ ...p, idx: i, total: pts.length });
+      }
+      const drawCount = Math.floor(arcProgressGlobe * visible.length);
+
+      for (let pass = 0; pass < 3; pass++) {
+        ctxGlobe.save();
+        ctxGlobe.beginPath();
+        let started = false;
+        for (let i = 0; i < drawCount; i++) {
+          const p = visible[i];
+          if (!p.visible) { started = false; continue; }
+          if (!started) { ctxGlobe.moveTo(p.x, p.y); started = true; }
+          else ctxGlobe.lineTo(p.x, p.y);
+        }
+        const gw = [4, 2, 1.5][pass];
+        const ga = [0.04, 0.15, 0.9][pass];
+        ctxGlobe.strokeStyle = `rgba(37,211,102,${ga})`;
+        ctxGlobe.lineWidth = gw;
+        ctxGlobe.lineCap = 'round';
+        ctxGlobe.stroke();
+        ctxGlobe.restore();
+      }
+
+      if (drawCount > 0) {
+        const p = visible[Math.min(drawCount - 1, visible.length - 1)];
+        if (p.visible) {
+          const pulse = (Math.sin(Date.now() * 0.008) + 1) / 2;
+          ctxGlobe.beginPath();
+          ctxGlobe.arc(p.x, p.y, 4 + pulse * 2, 0, Math.PI * 2);
+          ctxGlobe.fillStyle = `rgba(37,211,102,${0.3 + pulse * 0.3})`;
+          ctxGlobe.fill();
+          ctxGlobe.beginPath();
+          ctxGlobe.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+          ctxGlobe.fillStyle = 'var(--wpp)';
+          ctxGlobe.fill();
+        }
+      }
+    }
+  }
+
+  SEDES_DATA.forEach(s => {
+    const p = projectGlobe(s.lat, s.lon);
+    if (!p.visible) return;
+
+    const isActive = activeSedeGlobeName === s.nome || (connectionGlobe && connectionGlobe[5] === s.nome) || (hoveredMatchGlobe && hoveredMatchGlobe[5] === s.nome);
+
+    if (isActive) {
+      const pulse = (Math.sin(Date.now() * 0.006) + 1) / 2;
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 8 + pulse * 4, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = 'rgba(0,200,83,0.18)';
+      ctxGlobe.fill();
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = 'var(--win)';
+      ctxGlobe.fill();
+    } else {
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = '#4f80ff';
+      ctxGlobe.fill();
+    }
+  });
+
+  const activeTeams = connectionGlobe ? [connectionGlobe[3], connectionGlobe[4]] : (hoveredMatchGlobe ? [hoveredMatchGlobe[3], hoveredMatchGlobe[4]] : []);
+  
+  for (const [countryName, coords] of Object.entries(COORDENADAS_PAISES)) {
+    const p = projectGlobe(coords[0], coords[1]);
+    if (!p.visible) continue;
+
+    const isSelected = activeTeams.includes(countryName);
+    if (isSelected) {
+      const pulse = (Math.sin(Date.now() * 0.006) + 1) / 2;
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 7 + pulse * 3, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = 'rgba(255,223,0,0.25)';
+      ctxGlobe.fill();
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = 'var(--amarelo)';
+      ctxGlobe.fill();
+    } else {
+      ctxGlobe.beginPath();
+      ctxGlobe.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+      ctxGlobe.fillStyle = 'rgba(232,234,240,0.12)';
+      ctxGlobe.fill();
+    }
+  }
+
+  ctxGlobe.beginPath();
+  ctxGlobe.arc(WGlobe / 2, HGlobe / 2, radiusGlobe, 0, Math.PI * 2);
+  ctxGlobe.strokeStyle = 'rgba(28,40,64,0.3)';
+  ctxGlobe.lineWidth = 1;
+  ctxGlobe.stroke();
+  
+  atualizarPosicaoTooltip();
+}
+
+function atualizarPosicaoTooltip() {
+  const tooltip = document.getElementById('globeTooltip');
+  if (!tooltip || !tooltip.classList.contains('show')) return;
+  
+  let lat = null, lon = null;
+  if (activeSedeGlobeName) {
+    const s = SEDES_DATA.find(x => x.nome === activeSedeGlobeName);
+    if (s) { lat = s.lat; lon = s.lon; }
+  } else if (connectionGlobe) {
+    const local = connectionGlobe[5];
+    const coordsSede = COORDENADAS_SEDES[local];
+    if (coordsSede) { lat = coordsSede[0]; lon = coordsSede[1]; }
+  } else if (hoveredMatchGlobe) {
+    const local = hoveredMatchGlobe[5];
+    const coordsSede = COORDENADAS_SEDES[local];
+    if (coordsSede) { lat = coordsSede[0]; lon = coordsSede[1]; }
+  }
+
+  if (lat !== null && lon !== null) {
+    const p = projectGlobe(lat, lon);
+    if (p.visible) {
+      tooltip.style.left = `${p.x}px`;
+      tooltip.style.top = `${p.y}px`;
+      tooltip.style.display = 'block';
+    } else {
+      tooltip.style.display = 'none';
+    }
+  }
+}
+
+function animateGlobe(t) {
+  if (autoRotateGlobe && !draggingGlobe && !connectionGlobe) {
+    if (lastTimeGlobe) rotationGlobe[0] += (t - lastTimeGlobe) * 0.006;
+    lastTimeGlobe = t;
+  } else {
+    lastTimeGlobe = 0;
+  }
+  drawGlobeCanvas();
+  requestAnimIdGlobe = requestAnimationFrame(animateGlobe);
+}
+
+function inicializarGloboSeNecessario() {
+  if (globeInicializado) return;
+  globeInicializado = true;
+
+  canvasGlobe = document.getElementById('canvasGlobe');
+  ctxGlobe = canvasGlobe.getContext('2d');
+
+  canvasGlobe.addEventListener('mousedown', e => {
+    draggingGlobe = true;
+    autoRotateGlobe = false;
+    dragStartGlobe = { x: e.clientX, y: e.clientY };
+    rotStartGlobe = [...rotationGlobe];
+    document.getElementById('globeHint').classList.add('hidden');
+  });
+
+  window.addEventListener('mouseup', () => {
+    draggingGlobe = false;
+    setTimeout(() => {
+      if (!hoveredMatchGlobe && !connectionGlobe) autoRotateGlobe = true;
+    }, 2000);
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!draggingGlobe) return;
+    const dx = e.clientX - dragStartGlobe.x;
+    const dy = e.clientY - dragStartGlobe.y;
+    rotationGlobe[0] = rotStartGlobe[0] + dx * 0.4;
+    rotationGlobe[1] = Math.max(-80, Math.min(80, rotStartGlobe[1] - dy * 0.4));
+  });
+
+  canvasGlobe.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    draggingGlobe = true;
+    autoRotateGlobe = false;
+    dragStartGlobe = { x: t.clientX, y: t.clientY };
+    rotStartGlobe = [...rotationGlobe];
+    document.getElementById('globeHint').classList.add('hidden');
+  }, { passive: false });
+
+  window.addEventListener('touchend', () => {
+    draggingGlobe = false;
+    setTimeout(() => { autoRotateGlobe = true; }, 2000);
+  });
+
+  window.addEventListener('touchmove', e => {
+    if (!draggingGlobe) return;
+    const t = e.touches[0];
+    const dx = t.clientX - dragStartGlobe.x;
+    const dy = t.clientY - dragStartGlobe.y;
+    rotationGlobe[0] = rotStartGlobe[0] + dx * 0.4;
+    rotationGlobe[1] = Math.max(-80, Math.min(80, rotStartGlobe[1] - dy * 0.4));
+  });
+
+  canvasGlobe.addEventListener('wheel', e => {
+    e.preventDefault();
+    radiusGlobe = Math.max(80, Math.min(Math.min(WGlobe, HGlobe) * 0.52, radiusGlobe - e.deltaY * 0.3));
+  }, { passive: false });
+
+  loadGeoGlobe();
+  renderListaSedesGlobo();
+  alterarGrupoGlobo();
+
+  requestAnimIdGlobe = requestAnimationFrame(animateGlobe);
+}
+
+function resizeGlobe() {
+  if (!canvasGlobe) return;
+  const area = canvasGlobe.parentElement.getBoundingClientRect();
+  WGlobe = area.width || 400; 
+  HGlobe = area.height || 400;
+  canvasGlobe.width = WGlobe;
+  canvasGlobe.height = HGlobe;
+  radiusGlobe = Math.min(WGlobe, HGlobe) * 0.42;
+  drawGlobeCanvas();
+}
+
+async function loadGeoGlobe() {
+  try {
+    const r = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    const topo = await r.json();
+    worldGeoGlobe = topojson.feature(topo, topo.objects.land);
+    drawGlobeCanvas();
+  } catch (e) {
+    drawGlobeCanvas();
+  }
+}
+
+function renderListaSedesGlobo() {
+  const container = document.getElementById('listaSedesGlobo');
+  let html = '';
+  SEDES_DATA.forEach((s, idx) => {
+    html += `
+      <div class="globo-sede-card${activeSedeGlobeName === s.nome ? ' active' : ''}" onclick="selecionarSedeGlobo('${s.nome}', ${idx})">
+        <span class="globo-sede-name">📍 ${s.nome} (${s.pais})</span>
+        <div class="globo-sede-details">
+          <span>🏟 ${s.estadio}</span>
+          <span>👥 ${s.cap} cap.</span>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function selecionarSedeGlobo(nome, idx) {
+  activeSedeGlobeName = nome;
+  activeMatchGlobeKey = null;
+  connectionGlobe = null;
+  autoRotateGlobe = false;
+  
+  document.querySelectorAll('.globo-sede-card').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.globo-match-card').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  const sede = SEDES_DATA[idx];
+  rotateToSedeGlobe(sede);
+  
+  const tooltip = document.getElementById('globeTooltip');
+  const ttTeams = document.getElementById('ttTeams');
+  const ttInfo = document.getElementById('ttInfo');
+  
+  ttTeams.textContent = `📍 ${sede.nome}, ${sede.pais}`;
+  ttInfo.textContent = `Estádio: ${sede.estadio} (Capacidade: ${sede.cap})`;
+  
+  tooltip.classList.add('show');
+}
+
+function alterarGrupoGlobo() {
+  const g = document.getElementById('selectGrupoGlobo').value;
+  const container = document.getElementById('listaJogosGlobo');
+  const jogosGrupo = JOGOS.filter(j => j[6] === g);
+  
+  let html = '';
+  jogosGrupo.forEach(j => {
+    const [id, data, hora, t1, t2, local] = j;
+    const formatado = obterDataHoraFormatada(data, hora);
+    const p = placares[id] || {};
+    const temScore = p.g1 !== null && p.g1 !== undefined;
+    const scoreStr = temScore ? `${p.g1} × ${p.g2}` : 'vs';
+    
+    html += `
+      <div class="globo-match-card${activeMatchGlobeKey === id ? ' active' : ''}" 
+           onclick="selecionarJogoGlobo('${id}')" 
+           onmouseenter="hoverJogoGlobo('${id}', true)" 
+           onmouseleave="hoverJogoGlobo('${id}', false)"
+           id="gmatch-${id}">
+        <div class="globo-match-header">Grupo ${g} · Sede: ${local}</div>
+        <div class="globo-match-teams">
+          <span>${FLAGS[t1] || '🏳'} ${t1}</span>
+          <span style="color:var(--amarelo); margin:0 6px">${scoreStr}</span>
+          <span>${t2} ${FLAGS[t2] || '🏳'}</span>
+        </div>
+        <div class="globo-match-meta">
+          <span>${formatado.data}</span>
+          <span>${formatado.hora}</span>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function selecionarJogoGlobo(id) {
+  activeMatchGlobeKey = id;
+  activeSedeGlobeName = null;
+  
+  document.querySelectorAll('.globo-match-card').forEach(el => {
+    el.classList.toggle('active', el.id === `gmatch-${id}`);
+  });
+  document.querySelectorAll('.globo-sede-card').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  const j = JOGOS.find(x => x[0] === id);
+  if (!j) return;
+
+  const [,, , t1, t2, local] = j;
+  highlightConnectionGlobe(j, true);
+
+  const coordsSede = COORDENADAS_SEDES[local];
+  if (coordsSede) {
+    const tooltip = document.getElementById('globeTooltip');
+    const ttTeams = document.getElementById('ttTeams');
+    const ttInfo = document.getElementById('ttInfo');
+    
+    ttTeams.textContent = `${t1} vs ${t2}`;
+    ttInfo.textContent = `Sede: ${local}`;
+    
+    setTimeout(() => {
+      tooltip.classList.add('show');
+    }, 100);
+  }
+}
+
+function hoverJogoGlobo(id, enter) {
+  if (!enter) {
+    hoveredMatchGlobe = null;
+    if (temporizadorHoverGlobe) clearTimeout(temporizadorHoverGlobe);
+    if (!activeMatchGlobeKey) {
+      connectionGlobe = null;
+      arcTargetGlobe = 0;
+      animateArcGlobe(0);
+      autoRotateGlobe = true;
+      document.getElementById('globeTooltip').classList.remove('show');
+    } else {
+      const jAtivo = JOGOS.find(x => x[0] === activeMatchGlobeKey);
+      if (jAtivo) {
+        highlightConnectionGlobe(jAtivo, true);
+      }
+    }
+    return;
+  }
+  
+  const j = JOGOS.find(x => x[0] === id);
+  if (!j) return;
+
+  hoveredMatchGlobe = j;
+  if (temporizadorHoverGlobe) clearTimeout(temporizadorHoverGlobe);
+  
+  temporizadorHoverGlobe = setTimeout(() => {
+    highlightConnectionGlobe(j, true);
+    
+    const [,, , t1, t2, local] = j;
+    const coordsSede = COORDENADAS_SEDES[local];
+    if (coordsSede) {
+      const tooltip = document.getElementById('globeTooltip');
+      const ttTeams = document.getElementById('ttTeams');
+      const ttInfo = document.getElementById('ttInfo');
+      
+      ttTeams.textContent = `${t1} vs ${t2}`;
+      ttInfo.textContent = `Sede: ${local}`;
+      
+      tooltip.classList.add('show');
+    }
+  }, 150);
+}
 
 // ════════════════════════════════════════════════════════
 // INIT
