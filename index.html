@@ -917,12 +917,12 @@ function processarPartidas(matches) {
 
   // 1. Process group stage matches first
   matches.forEach(m => {
-    if (!m.stage || m.stage === 'GROUP_STAGE') {
-      const t1 = normalizarNome(m.homeTeam?.name || '');
-      const t2 = normalizarNome(m.awayTeam?.name || '');
-      const jLocal = JOGOS.find(j => normalizarNome(j[3]) === t1 && normalizarNome(j[4]) === t2);
-      if (!jLocal) return;
+    const t1 = normalizarNome(m.homeTeam?.name || '');
+    const t2 = normalizarNome(m.awayTeam?.name || '');
+    if (!t1 || !t2) return;
 
+    const jLocal = JOGOS.find(j => normalizarNome(j[3]) === t1 && normalizarNome(j[4]) === t2);
+    if (jLocal) {
       const id = jLocal[0];
       const s = m.score?.fullTime;
       const status = m.status; // SCHEDULED, IN_PLAY, PAUSED, FINISHED
@@ -944,11 +944,13 @@ function processarPartidas(matches) {
 
   // 3. Process knockout stage matches by matching their team names
   matches.forEach(m => {
-    if (m.stage && m.stage !== 'GROUP_STAGE') {
-      const t1 = normalizarNome(m.homeTeam?.name || '');
-      const t2 = normalizarNome(m.awayTeam?.name || '');
-      if (!t1 || !t2) return;
+    const t1 = normalizarNome(m.homeTeam?.name || '');
+    const t2 = normalizarNome(m.awayTeam?.name || '');
+    if (!t1 || !t2) return;
 
+    // Se não está no JOGOS de grupo, é jogo das eliminatórias
+    const jLocal = JOGOS.find(j => normalizarNome(j[3]) === t1 && normalizarNome(j[4]) === t2);
+    if (!jLocal) {
       BRACKET_FASES.forEach(fase => {
         fase.jogos.forEach(jogo => {
           const jt1 = normalizarNome(jogo._t1 || '');
