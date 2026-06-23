@@ -142,8 +142,9 @@ table.ct tr:hover td{background:rgba(255,255,255,.03)}
 .bk-time.vencedor-bk{background:rgba(0,200,83,.08)}
 .bk-time.vencedor-bk .bk-nome{color:var(--win)}
 .bk-flag{font-size:16px;flex-shrink:0}
-.bk-nome{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-nome{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center}
 .bk-nome.brasil-nome{color:var(--amarelo)}
+.bk-pos-badge{font-size:9px;color:var(--muted);font-weight:400;margin-left:5px;background:rgba(255,255,255,0.05);padding:1px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.03);line-height:1}
 .bk-gol{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:20px;text-align:right}
 .bk-vazio{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:rgba(232,234,240,.2);padding:7px 10px;font-style:italic}
 .bk-slot{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -788,45 +789,45 @@ const JOGOS = [
 // Após grupos preenchidos, resolve automaticamente
 const BRACKET_FASES = [
   { label:'32 Avos de Final', jogos:[
-    {id:'e01', s1:'1A', s2:'2B', data:'28/06 Dom', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e02', s1:'1C', s2:'2D', data:'29/06 Seg', local:'Boston (Gillette Stadium)'},
-    {id:'e03', s1:'1E', s2:'2F', data:'29/06 Seg', local:'Monterrey (Estadio BBVA)'},
-    {id:'e04', s1:'1G', s2:'2H', data:'29/06 Seg', local:'Houston (NRG Stadium)'},
-    {id:'e05', s1:'1I', s2:'2J', data:'30/06 Ter', local:'Nova York/NJ (MetLife Stadium)'},
-    {id:'e06', s1:'1K', s2:'2L', data:'30/06 Ter', local:'Dallas (AT&T Stadium)'},
-    {id:'e07', s1:'2A', s2:'1B', data:'30/06 Ter', local:'Cidade do México (Estadio Azteca)'},
-    {id:'e08', s1:'2C', s2:'1D', data:'01/07 Qua', local:'Atlanta (Mercedes-Benz Stadium)'},
-    {id:'e09', s1:'2E', s2:'1F', data:'02/07 Qui', local:'San Francisco (Levi\'s Stadium)'},
-    {id:'e10', s1:'2G', s2:'1H', data:'01/07 Qua', local:'Seattle (Lumen Field)'},
-    {id:'e11', s1:'2I', s2:'1J', data:'03/07 Sex', local:'Toronto (BMO Field)'},
-    {id:'e12', s1:'2K', s2:'1L', data:'02/07 Qui', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e13', s1:'3ABC', s2:'3DEF', data:'03/07 Sex', local:'Vancouver (BC Place)'},
-    {id:'e14', s1:'3GHI', s2:'3JKL', data:'03/07 Sex', local:'Miami (Hard Rock Stadium)'},
-    {id:'e15', s1:'3ABD', s2:'3CEG', data:'04/07 Sáb', local:'Kansas City (Arrowhead Stadium)'},
-    {id:'e16', s1:'3FHI', s2:'3JKL', data:'03/07 Sex', local:'Dallas (AT&T Stadium)'},
+    {id:'e01', s1:'1A', s2:'2B', data:'28/06 Dom', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e02', s1:'1C', s2:'2D', data:'29/06 Seg', hora:'17h30', local:'Boston (Gillette Stadium)'},
+    {id:'e03', s1:'1E', s2:'2F', data:'29/06 Seg', hora:'22h', local:'Monterrey (Estadio BBVA)'},
+    {id:'e04', s1:'1G', s2:'2H', data:'29/06 Seg', hora:'14h', local:'Houston (NRG Stadium)'},
+    {id:'e05', s1:'1I', s2:'2J', data:'30/06 Ter', hora:'18h', local:'Nova York/NJ (MetLife Stadium)'},
+    {id:'e06', s1:'1K', s2:'2L', data:'30/06 Ter', hora:'14h', local:'Dallas (AT&T Stadium)'},
+    {id:'e07', s1:'2A', s2:'1B', data:'30/06 Ter', hora:'22h', local:'Cidade do México (Estadio Azteca)'},
+    {id:'e08', s1:'2C', s2:'1D', data:'01/07 Qua', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
+    {id:'e09', s1:'2E', s2:'1F', data:'02/07 Qui', hora:'23h30', local:'San Francisco (Levi\'s Stadium)'},
+    {id:'e10', s1:'2G', s2:'1H', data:'01/07 Qua', hora:'16h', local:'Seattle (Lumen Field)'},
+    {id:'e11', s1:'2I', s2:'1J', data:'03/07 Sex', hora:'21h', local:'Toronto (BMO Field)'},
+    {id:'e12', s1:'2K', s2:'1L', data:'02/07 Qui', hora:'23h30', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e13', s1:'3ABC', s2:'3DEF', data:'03/07 Sex', hora:'21h', local:'Vancouver (BC Place)'},
+    {id:'e14', s1:'3GHI', s2:'3JKL', data:'03/07 Sex', hora:'21h', local:'Miami (Hard Rock Stadium)'},
+    {id:'e15', s1:'3ABD', s2:'3CEG', data:'04/07 Sáb', hora:'22h', local:'Kansas City (Arrowhead Stadium)'},
+    {id:'e16', s1:'3FHI', s2:'3JKL', data:'03/07 Sex', hora:'22h', local:'Dallas (AT&T Stadium)'},
   ]},
   { label:'Oitavas de Final', jogos:[
-    {id:'e17', s1:'We01', s2:'We02', data:'04/07 Sáb', local:'Filadélfia (Lincoln Financial Field)'},
-    {id:'e18', s1:'We03', s2:'We04', data:'04/07 Sáb', local:'Houston (NRG Stadium)'},
-    {id:'e19', s1:'We05', s2:'We06', data:'05/07 Dom', local:'Nova York/NJ (MetLife Stadium)'},
-    {id:'e20', s1:'We07', s2:'We08', data:'05/07 Dom', local:'Cidade do México (Estadio Azteca)'},
-    {id:'e21', s1:'We09', s2:'We10', data:'06/07 Seg', local:'Dallas (AT&T Stadium)'},
-    {id:'e22', s1:'We11', s2:'We12', data:'06/07 Seg', local:'Seattle (Lumen Field)'},
-    {id:'e23', s1:'We13', s2:'We14', data:'07/07 Ter', local:'Atlanta (Mercedes-Benz Stadium)'},
-    {id:'e24', s1:'We15', s2:'We16', data:'07/07 Ter', local:'Vancouver (BC Place)'},
+    {id:'e17', s1:'We01', s2:'We02', data:'04/07 Sáb', hora:'18h', local:'Filadélfia (Lincoln Financial Field)'},
+    {id:'e18', s1:'We03', s2:'We04', data:'04/07 Sáb', hora:'14h', local:'Houston (NRG Stadium)'},
+    {id:'e19', s1:'We05', s2:'We06', data:'05/07 Dom', hora:'17h', local:'Nova York/NJ (MetLife Stadium)'},
+    {id:'e20', s1:'We07', s2:'We08', data:'05/07 Dom', hora:'21h', local:'Cidade do México (Estadio Azteca)'},
+    {id:'e21', s1:'We09', s2:'We10', data:'06/07 Seg', hora:'16h', local:'Dallas (AT&T Stadium)'},
+    {id:'e22', s1:'We11', s2:'We12', data:'06/07 Seg', hora:'21h', local:'Seattle (Lumen Field)'},
+    {id:'e23', s1:'We13', s2:'We14', data:'07/07 Ter', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
+    {id:'e24', s1:'We15', s2:'We16', data:'07/07 Ter', hora:'17h', local:'Vancouver (BC Place)'},
   ]},
   { label:'Quartas de Final', jogos:[
-    {id:'e25', s1:'We17', s2:'We18', data:'09/07 Qui', local:'Boston (Gillette Stadium)'},
-    {id:'e26', s1:'We19', s2:'We20', data:'10/07 Sex', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e27', s1:'We21', s2:'We22', data:'11/07 Sáb', local:'Miami (Hard Rock Stadium)'},
-    {id:'e28', s1:'We23', s2:'We24', data:'11/07 Sáb', local:'Kansas City (Arrowhead Stadium)'},
+    {id:'e25', s1:'We17', s2:'We18', data:'09/07 Qui', hora:'17h', local:'Boston (Gillette Stadium)'},
+    {id:'e26', s1:'We19', s2:'We20', data:'10/07 Sex', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e27', s1:'We21', s2:'We22', data:'11/07 Sáb', hora:'18h', local:'Miami (Hard Rock Stadium)'},
+    {id:'e28', s1:'We23', s2:'We24', data:'11/07 Sáb', hora:'22h', local:'Kansas City (Arrowhead Stadium)'},
   ]},
   { label:'Semifinal', jogos:[
-    {id:'e29', s1:'We25', s2:'We26', data:'14/07 Ter', local:'Dallas (AT&T Stadium)'},
-    {id:'e30', s1:'We27', s2:'We28', data:'15/07 Qua', local:'Atlanta (Mercedes-Benz Stadium)'},
+    {id:'e29', s1:'We25', s2:'We26', data:'14/07 Ter', hora:'16h', local:'Dallas (AT&T Stadium)'},
+    {id:'e30', s1:'We27', s2:'We28', data:'15/07 Qua', hora:'16h', local:'Atlanta (Mercedes-Benz Stadium)'},
   ]},
   { label:'Final', jogos:[
-    {id:'e31', s1:'We29', s2:'We30', data:'19/07 Dom', local:'Nova York/NJ (MetLife Stadium)'},
+    {id:'e31', s1:'We29', s2:'We30', data:'19/07 Dom', hora:'16h', local:'Nova York/NJ (MetLife Stadium)'},
   ]},
 ];
 
@@ -1106,6 +1107,18 @@ function resolverBracket() {
   const melhoresTerceiros = getMelhoresTerceiros();
   const atribuidosTerceiros = new Set();
 
+  // Mapeia posições originais dos times classificados
+  const posicoesOriginais = {};
+  Object.keys(cls).forEach(key => {
+    const time = cls[key];
+    const pos = key[0] === '1' ? '1º' : '2º';
+    const grupo = key.slice(1);
+    posicoesOriginais[time] = `${pos} Gr. ${grupo}`;
+  });
+  melhoresTerceiros.forEach(terc => {
+    posicoesOriginais[terc.t] = `3º Gr. ${terc.grupo}`;
+  });
+
   // Resolve cada jogo eliminatório
   BRACKET_FASES.forEach(fase => {
     fase.jogos.forEach(jogo => {
@@ -1141,6 +1154,8 @@ function resolverBracket() {
       }
       jogo._t1 = t1;
       jogo._t2 = t2;
+      jogo._t1_pos = posicoesOriginais[t1] || '';
+      jogo._t2_pos = posicoesOriginais[t2] || '';
     });
   });
   return vencedores;
@@ -1283,28 +1298,38 @@ function renderBracket() {
       const brasil = t1==='Brasil'||t2==='Brasil';
       const v1 = temPlacar&&p.g1>p.g2, v2 = temPlacar&&p.g2>p.g1;
 
+      let dataExibicao = jogo.data;
+      let horaExibicao = jogo.hora;
+      if (jogo.data && jogo.hora) {
+        const formatado = obterDataHoraFormatada(jogo.data, jogo.hora);
+        dataExibicao = formatado.data;
+        horaExibicao = formatado.hora;
+      }
+
       html += `<div class="bk-jogo${brasil?' brasil-bk':''}" onclick="${t1&&t2?`abrirH2H('${jogo.id}','${t1}','${t2}')`:''}" >`;
       if (t1) {
+        const badge1 = jogo._t1_pos ? `<span class="bk-pos-badge">${jogo._t1_pos}</span>` : '';
         html += `<div class="bk-time${v1?' vencedor-bk':''}">
           <span class="bk-flag">${FLAGS[t1]||'🏳'}</span>
-          <span class="bk-nome${t1==='Brasil'?' brasil-nome':''}">${t1}</span>
+          <span class="bk-nome${t1==='Brasil'?' brasil-nome':''}">${t1}${badge1}</span>
           ${temPlacar?`<span class="bk-gol${v1?' vencedor':''}">${p.g1}</span>`:''}
         </div>`;
       } else {
         html += `<div class="bk-slot"><span class="bk-slot-nome">${slotLabel(jogo.s1)}</span></div>`;
       }
       if (t2) {
+        const badge2 = jogo._t2_pos ? `<span class="bk-pos-badge">${jogo._t2_pos}</span>` : '';
         html += `<div class="bk-time${v2?' vencedor-bk':''}">
           <span class="bk-flag">${FLAGS[t2]||'🏳'}</span>
-          <span class="bk-nome${t2==='Brasil'?' brasil-nome':''}">${t2}</span>
+          <span class="bk-nome${t2==='Brasil'?' brasil-nome':''}">${t2}${badge2}</span>
           ${temPlacar?`<span class="bk-gol${v2?' vencedor':''}">${p.g2}</span>`:''}
         </div>`;
       } else {
         html += `<div class="bk-slot"><span class="bk-slot-nome">${slotLabel(jogo.s2)}</span></div>`;
       }
-      if (jogo.data && jogo.local) {
+      if (dataExibicao && jogo.local) {
         html += `<div class="bk-meta">
-          <div class="bk-meta-item">📅 ${jogo.data}</div>
+          <div class="bk-meta-item">📅 ${dataExibicao} ${horaExibicao ? '· ' + horaExibicao : ''}</div>
           <div class="bk-meta-item">🏟️ ${jogo.local}</div>
         </div>`;
       }
@@ -1394,7 +1419,16 @@ function renderBrasil() {
       const p=placares[jogo.id]||{};
       const tem=p.g1!==null&&p.g1!==undefined;
       const status = p.status || 'SCHEDULED';
-      const statusTxt = status==='IN_PLAY'||status==='PAUSED'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${jogo.data}`;
+      
+      let dataExib = jogo.data;
+      let horaExib = jogo.hora;
+      if (jogo.data && jogo.hora) {
+        const formatado = obterDataHoraFormatada(jogo.data, jogo.hora);
+        dataExib = formatado.data;
+        horaExib = formatado.hora;
+      }
+      
+      const statusTxt = status==='IN_PLAY'||status==='PAUSED'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${dataExib} · ${horaExib}`;
       const statusColor = status==='IN_PLAY'||status==='PAUSED'?'#ef9a9a':status==='FINISHED'?'var(--win)':'var(--amarelo)';
 
       html+=`<div class="brasil-jogo-grande" onclick="abrirH2H('${jogo.id}','${t1}','${t2}')">
