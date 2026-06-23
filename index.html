@@ -901,7 +901,7 @@ async function buscarDadosAPI() {
     const data = await resp.json();
     processarPartidas(data.matches || []);
     const agora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    const aoVivo = (data.matches||[]).some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+    const aoVivo = (data.matches||[]).some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED' || m.status === 'LIVE');
     setStatus('ok', `Atualizado às ${agora}${aoVivo ? ' · 🔴 Ao vivo' : ''}`);
   } catch(e) {
     if (window.location.protocol === 'file:') {
@@ -1210,7 +1210,7 @@ function renderJogos() {
       const g1 = p.g1, g2 = p.g2;
       const temPlacar = g1!==null && g1!==undefined && g2!==null && g2!==undefined;
 
-      const statusHtml = status==='IN_PLAY'||status==='PAUSED'
+      const statusHtml = status==='IN_PLAY'||status==='PAUSED'||status==='LIVE'
         ? '<span class="status-tag ao-vivo">🔴 Ao vivo</span>'
         : status==='FINISHED'
           ? '<span class="status-tag encerrado">Encerrado</span>'
@@ -1380,8 +1380,8 @@ function renderBrasil() {
     const tem = g1!==null&&g1!==undefined&&g2!==null&&g2!==undefined;
     const status = p.status||'SCHEDULED';
     const [dd,sem] = data.split(' ');
-    const statusTxt = status==='IN_PLAY'||status==='PAUSED'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${sem} ${dd} · ${hora}`;
-    const statusColor = status==='IN_PLAY'||status==='PAUSED'?'#ef9a9a':status==='FINISHED'?'var(--win)':'var(--amarelo)';
+    const statusTxt = status==='IN_PLAY'||status==='PAUSED'||status==='LIVE'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${sem} ${dd} · ${hora}`;
+    const statusColor = status==='IN_PLAY'||status==='PAUSED'||status==='LIVE'?'#ef9a9a':status==='FINISHED'?'var(--win)':'var(--amarelo)';
 
     html += `<div class="brasil-jogo-grande" onclick="abrirH2H('${id}','${t1}','${t2}')">
       <div class="bjg-faixa"><span>🇧🇷</span><span>RUMO AO HEXA · NA TORCIDA EM CASA!</span><span>🏆</span></div>
@@ -1430,8 +1430,8 @@ function renderBrasil() {
         horaExib = formatado.hora;
       }
       
-      const statusTxt = status==='IN_PLAY'||status==='PAUSED'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${dataExib} · ${horaExib}`;
-      const statusColor = status==='IN_PLAY'||status==='PAUSED'?'#ef9a9a':status==='FINISHED'?'var(--win)':'var(--amarelo)';
+      const statusTxt = status==='IN_PLAY'||status==='PAUSED'||status==='LIVE'?'🔴 Ao vivo':status==='FINISHED'?'✓ Encerrado':`${dataExib} · ${horaExib}`;
+      const statusColor = status==='IN_PLAY'||status==='PAUSED'||status==='LIVE'?'#ef9a9a':status==='FINISHED'?'var(--win)':'var(--amarelo)';
 
       html+=`<div class="brasil-jogo-grande" onclick="abrirH2H('${jogo.id}','${t1}','${t2}')">
         <div class="bjg-faixa"><span>🇧🇷</span><span>${jogo.faseLabel.toUpperCase()} · RUMO AO HEXA!</span><span>🏆</span></div>
