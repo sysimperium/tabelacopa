@@ -2841,9 +2841,9 @@ async function buscarArtilheirosAPI() {
               pos: idx + 1,
               nome: item.player.name,
               selecao: traduzirNomeIngles(item.team?.name || ''),
-              gols: item.numberOfGoals || 0,
+              gols: item.goals || 0,
               jogos: item.playedMatches || 0,
-              foto: `https://crests.football-data.org/${item.team?.id}.svg`
+              foto: item.team?.crest || ''
             };
           });
           artilheirosCache = { data: adaptados, real: true, ts: Date.now() };
