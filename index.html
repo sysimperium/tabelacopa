@@ -520,6 +520,93 @@ canvas#canvasGlobe:active {
   color: var(--muted);
 }
 
+/* ── ARTILHEIROS ── */
+.artilheiros-wrap {
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+.artilheiros-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.artilheiros-table th {
+  background: rgba(255,255,255,0.03);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--amarelo);
+  letter-spacing: 1px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borda);
+}
+.artilheiros-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  vertical-align: middle;
+}
+.artilheiros-table tr:last-child td {
+  border-bottom: none;
+}
+.artilheiros-pos {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--muted);
+  width: 30px;
+}
+.artilheiros-pos.podium {
+  color: var(--amarelo);
+  font-size: 20px;
+}
+.artilheiros-jogador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.artilheiros-foto {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  object-fit: cover;
+  border: 1px solid var(--borda);
+}
+.artilheiros-nome {
+  font-weight: 600;
+}
+.artilheiros-selecao {
+  font-size: 12px;
+  color: var(--muted);
+}
+.artilheiros-gols {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--amarelo);
+  text-align: right;
+  width: 60px;
+}
+.artilheiros-jogos {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  width: 50px;
+}
+.artilheiros-placeholder-msg {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid var(--borda);
+  background: rgba(255, 255, 255, 0.01);
+  line-height: 1.6;
+}
+
 footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15);letter-spacing:1px}
 </style>
 </head>
@@ -582,6 +669,7 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
   <button class="nav-btn" onclick="mudarTab('elim',this)">🏆 Eliminatórias</button>
   <button class="nav-btn" onclick="mudarTab('brasil',this)">🇧🇷 Brasil</button>
   <button class="nav-btn" onclick="mudarTab('wpp',this)">📲 WhatsApp</button>
+  <button class="nav-btn" onclick="mudarTab('artilheiros',this)">👟 Artilheiros</button>
   <button class="nav-btn" onclick="mudarTab('globo',this)">🌐 Globo 3D</button>
 </nav>
 
@@ -590,6 +678,10 @@ footer{text-align:center;padding:14px;font-size:11px;color:rgba(255,255,255,.15)
 <div id="tab-elim" class="tab"><p class="slabel">Chaveamento — Fase Eliminatória</p><div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div></div>
 <div id="tab-brasil" class="tab"><div id="brasil-container"></div></div>
 <div id="tab-wpp" class="tab"><p class="slabel">Mensagens prontas para o grupo da família</p><div class="wpp-cards" id="wpp-container"></div></div>
+<div id="tab-artilheiros" class="tab">
+  <p class="slabel">Artilharia · Copa do Mundo</p>
+  <div class="artilheiros-wrap" id="artilheiros-container"></div>
+</div>
 <div id="tab-globo" class="tab">
   <div class="globo-layout">
     <!-- Painel Esquerdo: Lista de jogos no Globo -->
@@ -789,22 +881,22 @@ const JOGOS = [
 // Após grupos preenchidos, resolve automaticamente
 const BRACKET_FASES = [
   { label:'32 Avos de Final', jogos:[
-    {id:'e01', s1:'1A', s2:'2B', data:'28/06 Dom', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e02', s1:'1C', s2:'2D', data:'29/06 Seg', hora:'17h30', local:'Boston (Gillette Stadium)'},
-    {id:'e03', s1:'1E', s2:'2F', data:'29/06 Seg', hora:'22h', local:'Monterrey (Estadio BBVA)'},
-    {id:'e04', s1:'1G', s2:'2H', data:'29/06 Seg', hora:'14h', local:'Houston (NRG Stadium)'},
-    {id:'e05', s1:'1I', s2:'2J', data:'30/06 Ter', hora:'18h', local:'Nova York/NJ (MetLife Stadium)'},
-    {id:'e06', s1:'1K', s2:'2L', data:'30/06 Ter', hora:'14h', local:'Dallas (AT&T Stadium)'},
-    {id:'e07', s1:'2A', s2:'1B', data:'30/06 Ter', hora:'22h', local:'Cidade do México (Estadio Azteca)'},
-    {id:'e08', s1:'2C', s2:'1D', data:'01/07 Qua', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
-    {id:'e09', s1:'2E', s2:'1F', data:'02/07 Qui', hora:'23h30', local:'San Francisco (Levi\'s Stadium)'},
-    {id:'e10', s1:'2G', s2:'1H', data:'01/07 Qua', hora:'16h', local:'Seattle (Lumen Field)'},
-    {id:'e11', s1:'2I', s2:'1J', data:'03/07 Sex', hora:'21h', local:'Toronto (BMO Field)'},
-    {id:'e12', s1:'2K', s2:'1L', data:'02/07 Qui', hora:'23h30', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e13', s1:'3ABC', s2:'3DEF', data:'03/07 Sex', hora:'21h', local:'Vancouver (BC Place)'},
-    {id:'e14', s1:'3GHI', s2:'3JKL', data:'03/07 Sex', hora:'21h', local:'Miami (Hard Rock Stadium)'},
-    {id:'e15', s1:'3ABD', s2:'3CEG', data:'04/07 Sáb', hora:'22h', local:'Kansas City (Arrowhead Stadium)'},
-    {id:'e16', s1:'3FHI', s2:'3JKL', data:'03/07 Sex', hora:'22h', local:'Dallas (AT&T Stadium)'},
+    {id:'e01', s1:'2A', s2:'2B', data:'28/06 Dom', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e02', s1:'1E', s2:'3ABCDF', data:'29/06 Seg', hora:'17h30', local:'Boston (Gillette Stadium)'},
+    {id:'e03', s1:'1F', s2:'2C', data:'29/06 Seg', hora:'22h', local:'Monterrey (Estadio BBVA)'},
+    {id:'e04', s1:'1C', s2:'2F', data:'29/06 Seg', hora:'14h', local:'Houston (NRG Stadium)'},
+    {id:'e05', s1:'1I', s2:'3CDFGH', data:'30/06 Ter', hora:'18h', local:'Nova York/NJ (MetLife Stadium)'},
+    {id:'e06', s1:'2E', s2:'2I', data:'30/06 Ter', hora:'14h', local:'Dallas (AT&T Stadium)'},
+    {id:'e07', s1:'1A', s2:'3CEFHI', data:'30/06 Ter', hora:'22h', local:'Cidade do México (Estadio Azteca)'},
+    {id:'e08', s1:'1L', s2:'3EHIJK', data:'01/07 Qua', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
+    {id:'e09', s1:'1D', s2:'3BEFIJ', data:'02/07 Qui', hora:'23h30', local:'San Francisco (Levi\'s Stadium)'},
+    {id:'e10', s1:'1G', s2:'3AEHIJ', data:'01/07 Qua', hora:'16h', local:'Seattle (Lumen Field)'},
+    {id:'e11', s1:'2K', s2:'2L', data:'03/07 Sex', hora:'21h', local:'Toronto (BMO Field)'},
+    {id:'e12', s1:'1H', s2:'2J', data:'02/07 Qui', hora:'23h30', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e13', s1:'1B', s2:'3EFGIJ', data:'03/07 Sex', hora:'21h', local:'Vancouver (BC Place)'},
+    {id:'e14', s1:'1J', s2:'2H', data:'03/07 Sex', hora:'21h', local:'Miami (Hard Rock Stadium)'},
+    {id:'e15', s1:'1K', s2:'3DEIJL', data:'04/07 Sáb', hora:'22h', local:'Kansas City (Arrowhead Stadium)'},
+    {id:'e16', s1:'2D', s2:'2G', data:'03/07 Sex', hora:'22h', local:'Dallas (AT&T Stadium)'},
   ]},
   { label:'Oitavas de Final', jogos:[
     {id:'e17', s1:'We01', s2:'We02', data:'04/07 Sáb', hora:'18h', local:'Filadélfia (Lincoln Financial Field)'},
@@ -900,6 +992,7 @@ async function buscarDadosAPI() {
     }
     const data = await resp.json();
     processarPartidas(data.matches || []);
+    buscarArtilheirosAPI(); // Sincroniza artilharia
     const agora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const aoVivo = (data.matches||[]).some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED' || m.status === 'LIVE');
     setStatus('ok', `Atualizado às ${agora}${aoVivo ? ' · 🔴 Ao vivo' : ''}`);
@@ -1107,7 +1200,6 @@ function resolverBracket() {
   const cls = getClassificados();
   const vencedores = { ...cls };
   const melhoresTerceiros = getMelhoresTerceiros();
-  const atribuidosTerceiros = new Set();
 
   // Mapeia posições originais dos times classificados
   const posicoesOriginais = {};
@@ -1121,18 +1213,38 @@ function resolverBracket() {
     posicoesOriginais[terc.t] = `3º Gr. ${terc.grupo}`;
   });
 
+  // Encontra designações dos melhores terceiros usando emparelhamento máximo para os slots que contêm 3
+  const R32 = BRACKET_FASES[0].jogos;
+  const slotsCom3 = R32.filter(j => j.s1.startsWith('3') || j.s2.startsWith('3'));
+  
+  const matches = {}; // slotId -> team
+  function dfs(team, visited) {
+    for (const slot of slotsCom3) {
+      const slotCode = slot.s1.startsWith('3') ? slot.s1 : slot.s2;
+      const allowedGroups = slotCode.slice(1).split('');
+      if (allowedGroups.includes(team.grupo)) {
+        if (visited.has(slot.id)) continue;
+        visited.add(slot.id);
+        if (!matches[slot.id] || dfs(matches[slot.id], visited)) {
+          matches[slot.id] = team;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  for (const team of melhoresTerceiros) {
+    dfs(team, new Set());
+  }
+
   // Resolve cada jogo eliminatório
   BRACKET_FASES.forEach(fase => {
     fase.jogos.forEach(jogo => {
       // Resolve t1
       let t1 = null;
       if (jogo.s1.startsWith('3')) {
-        const allowedGroups = jogo.s1.slice(1).split('');
-        const cand = melhoresTerceiros.find(c => allowedGroups.includes(c.grupo) && !atribuidosTerceiros.has(c.t));
-        if (cand) {
-          t1 = cand.t;
-          atribuidosTerceiros.add(cand.t);
-        }
+        const terc = matches[jogo.id];
+        if (terc) t1 = terc.t;
       } else {
         t1 = resolverSlot(jogo.s1, vencedores);
       }
@@ -1140,12 +1252,8 @@ function resolverBracket() {
       // Resolve t2
       let t2 = null;
       if (jogo.s2.startsWith('3')) {
-        const allowedGroups = jogo.s2.slice(1).split('');
-        const cand = melhoresTerceiros.find(c => allowedGroups.includes(c.grupo) && !atribuidosTerceiros.has(c.t));
-        if (cand) {
-          t2 = cand.t;
-          atribuidosTerceiros.add(cand.t);
-        }
+        const terc = matches[jogo.id];
+        if (terc) t2 = terc.t;
       } else {
         t2 = resolverSlot(jogo.s2, vencedores);
       }
@@ -1868,6 +1976,7 @@ function renderTudo() {
   renderGrupos();
   renderBracket();
   renderBrasil();
+  renderArtilheiros();
   if (globeInicializado) {
     alterarGrupoGlobo();
   }
@@ -2670,10 +2779,173 @@ function hoverJogoGlobo(id, enter) {
 }
 
 // ════════════════════════════════════════════════════════
+// ARTILHEIROS & ESTATÍSTICAS
+// ════════════════════════════════════════════════════════
+const SK_ARTILHEIROS = 'copa2026_artilheiros';
+let artilheirosCache = null;
+try {
+  artilheirosCache = JSON.parse(localStorage.getItem(SK_ARTILHEIROS));
+} catch(e) {}
+
+// Fallback/Mockup data based on historic 2022 World Cup scorers
+const MOCK_ARTILHEIROS = [
+  { pos: 1, nome: 'Kylian Mbappé', selecao: 'França', gols: 8, jogos: 7, foto: 'https://media.api-sports.io/football/players/278.png' },
+  { pos: 2, nome: 'Lionel Messi', selecao: 'Argentina', gols: 7, jogos: 7, foto: 'https://media.api-sports.io/football/players/154.png' },
+  { pos: 3, nome: 'Olivier Giroud', selecao: 'França', gols: 4, jogos: 7, foto: 'https://media.api-sports.io/football/players/510.png' },
+  { pos: 4, nome: 'Julián Álvarez', selecao: 'Argentina', gols: 4, jogos: 7, foto: 'https://media.api-sports.io/football/players/647.png' },
+  { pos: 5, nome: 'Marcus Rashford', selecao: 'Inglaterra', gols: 3, jogos: 5, foto: 'https://media.api-sports.io/football/players/909.png' },
+  { pos: 6, nome: 'Cody Gakpo', selecao: 'Holanda', gols: 3, jogos: 5, foto: 'https://media.api-sports.io/football/players/569.png' },
+  { pos: 7, nome: 'Richarlison', selecao: 'Brasil', gols: 3, jogos: 4, foto: 'https://media.api-sports.io/football/players/2413.png' },
+  { pos: 8, nome: 'Gonçalo Ramos', selecao: 'Portugal', gols: 3, jogos: 4, foto: 'https://media.api-sports.io/football/players/18786.png' }
+];
+
+async function buscarArtilheirosAPI() {
+  if (apiFootballKey) {
+    try {
+      const resp = await fetchAPIFootball(`/players/topscorers?league=1&season=2026`);
+      if (!resp.ok) throw new Error(`Status ${resp.status}`);
+      const data = await resp.json();
+      const list = data.response || [];
+      
+      if (list.length > 0) {
+        const adaptados = list.map((item, idx) => {
+          const stats = item.statistics[0] || {};
+          return {
+            pos: idx + 1,
+            nome: item.player.name,
+            selecao: traduzirNomeIngles(stats.team?.name || ''),
+            gols: stats.goals?.total || 0,
+            jogos: stats.games?.appearence || 0,
+            foto: item.player.photo || ''
+          };
+        });
+        artilheirosCache = { data: adaptados, real: true, ts: Date.now() };
+        localStorage.setItem(SK_ARTILHEIROS, JSON.stringify(artilheirosCache));
+        renderArtilheiros();
+        return;
+      }
+    } catch (e) {
+      console.error("Erro ao buscar artilheiros no API-Football:", e);
+    }
+  }
+  
+  if (apiKey) {
+    try {
+      const resp = await fetchAPI(`/competitions/${COMP_ID}/scorers`);
+      if (resp.ok) {
+        const data = await resp.json();
+        const list = data.scorers || [];
+        if (list.length > 0) {
+          const adaptados = list.map((item, idx) => {
+            return {
+              pos: idx + 1,
+              nome: item.player.name,
+              selecao: traduzirNomeIngles(item.team?.name || ''),
+              gols: item.numberOfGoals || 0,
+              jogos: item.playedMatches || 0,
+              foto: `https://crests.football-data.org/${item.team?.id}.svg`
+            };
+          });
+          artilheirosCache = { data: adaptados, real: true, ts: Date.now() };
+          localStorage.setItem(SK_ARTILHEIROS, JSON.stringify(artilheirosCache));
+          renderArtilheiros();
+          return;
+        }
+      }
+    } catch(e) {
+      console.error("Erro ao buscar artilheiros no football-data:", e);
+    }
+  }
+  
+  if (!artilheirosCache) {
+    artilheirosCache = { data: MOCK_ARTILHEIROS, real: false, ts: Date.now() };
+    localStorage.setItem(SK_ARTILHEIROS, JSON.stringify(artilheirosCache));
+  }
+  renderArtilheiros();
+}
+
+function renderArtilheiros() {
+  const container = document.getElementById('artilheiros-container');
+  if (!container) return;
+  
+  const cache = artilheirosCache || { data: MOCK_ARTILHEIROS, real: false };
+  const lista = cache.data || [];
+  
+  let html = '';
+  if (lista.length === 0) {
+    html = `<div style="padding:40px;text-align:center;color:var(--muted)">Nenhum gol marcado ainda. Acompanhe assim que a Copa começar!</div>`;
+  } else {
+    html = `
+      <table class="artilheiros-table">
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Jogador</th>
+            <th style="text-align:center">Jogos</th>
+            <th style="text-align:right">Gols</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    lista.forEach(item => {
+      const flag = FLAGS[item.selecao] || '🏳️';
+      const isPodium = item.pos <= 3 ? 'podium' : '';
+      const fotoUrl = item.foto || 'https://media.api-sports.io/football/players/placeholder.png';
+      
+      html += `
+        <tr>
+          <td class="artilheiros-pos ${isPodium}">${item.pos}º</td>
+          <td>
+            <div class="artilheiros-jogador">
+              <img class="artilheiros-foto" src="${fotoUrl}" onerror="this.src='https://media.api-sports.io/football/players/placeholder.png'" alt="${item.nome}">
+              <div>
+                <div class="artilheiros-nome">${item.nome}</div>
+                <div class="artilheiros-selecao">${flag} ${item.selecao}</div>
+              </div>
+            </div>
+          </td>
+          <td class="artilheiros-jogos">${item.jogos}</td>
+          <td class="artilheiros-gols">${item.gols}</td>
+        </tr>
+      `;
+    });
+    
+    html += `
+        </tbody>
+      </table>
+    `;
+    
+    if (!cache.real) {
+      html += `
+        <div class="artilheiros-placeholder-msg">
+          ℹ️ <strong>Demonstração (Histórico da Copa 2022)</strong><br>
+          Insira e conecte sua API Key em ⚙ para sincronizar automaticamente com a artilharia da Copa 2026.
+        </div>
+      `;
+    }
+  }
+  
+  container.innerHTML = html;
+}
+
+function traduzirNomeIngles(nomeEng) {
+  const normEng = nomeEng.toLowerCase().replace(/\s+/g,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
+  const normPt = MAPA_TIMES[normEng] || normEng;
+  
+  const key = Object.keys(FLAGS).find(k => {
+    const kNorm = k.toLowerCase().replace(/\s+/g,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
+    return kNorm === normPt;
+  });
+  return key || nomeEng;
+}
+
+// ════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════
 renderWpp();
 renderTudo();
+buscarArtilheirosAPI(); // Inicializa dados/fallback de artilharia
 
 if (!apiKey) {
   setStatus('err','API Key não configurada — clique em ⚙ API Key para configurar');
