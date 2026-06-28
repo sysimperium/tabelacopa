@@ -130,13 +130,14 @@ table.ct tr:hover td{background:rgba(255,255,255,.03)}
 
 /* ── BRACKET ELIMINATÓRIAS ── */
 .bracket-wrap{overflow-x:auto;padding-bottom:16px}
-.bracket{display:flex;gap:0;min-width:900px}
+.bracket{display:flex;gap:0;min-width:1700px}
 .fase-col{flex:1;display:flex;flex-direction:column;gap:0;position:relative}
 .fase-titulo{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amarelo);text-align:center;padding:10px 6px;border-bottom:1px solid var(--borda);background:rgba(255,255,255,.02)}
 .fase-jogos{display:flex;flex-direction:column;justify-content:space-around;flex:1;padding:8px 4px;gap:8px}
 .bk-jogo{background:var(--card);border:1px solid var(--borda);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s}
 .bk-jogo:hover{border-color:rgba(255,223,0,.3);transform:translateY(-1px)}
 .bk-jogo.brasil-bk{border-color:var(--verde);box-shadow:0 0 12px rgba(0,156,59,.2)}
+.bk-jogo.final-bk{border-color:var(--amarelo);box-shadow:0 0 15px rgba(255,223,0,.25);background:linear-gradient(135deg,var(--card),rgba(255,223,0,0.05))}
 .bk-time{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
 .bk-time:last-child{border-bottom:none}
 .bk-time.vencedor-bk{background:rgba(0,200,83,.08)}
@@ -899,19 +900,19 @@ const BRACKET_FASES = [
     {id:'e16', s1:'2D', s2:'2G', data:'03/07 Sex', hora:'22h', local:'Dallas (AT&T Stadium)'},
   ]},
   { label:'Oitavas de Final', jogos:[
-    {id:'e17', s1:'We01', s2:'We02', data:'04/07 Sáb', hora:'18h', local:'Filadélfia (Lincoln Financial Field)'},
-    {id:'e18', s1:'We03', s2:'We04', data:'04/07 Sáb', hora:'14h', local:'Houston (NRG Stadium)'},
-    {id:'e19', s1:'We05', s2:'We06', data:'05/07 Dom', hora:'17h', local:'Nova York/NJ (MetLife Stadium)'},
+    {id:'e17', s1:'We02', s2:'We05', data:'04/07 Sáb', hora:'18h', local:'Filadélfia (Lincoln Financial Field)'},
+    {id:'e18', s1:'We01', s2:'We03', data:'04/07 Sáb', hora:'14h', local:'Houston (NRG Stadium)'},
+    {id:'e19', s1:'We04', s2:'We06', data:'05/07 Dom', hora:'17h', local:'Nova York/NJ (MetLife Stadium)'},
     {id:'e20', s1:'We07', s2:'We08', data:'05/07 Dom', hora:'21h', local:'Cidade do México (Estadio Azteca)'},
-    {id:'e21', s1:'We09', s2:'We10', data:'06/07 Seg', hora:'16h', local:'Dallas (AT&T Stadium)'},
-    {id:'e22', s1:'We11', s2:'We12', data:'06/07 Seg', hora:'21h', local:'Seattle (Lumen Field)'},
-    {id:'e23', s1:'We13', s2:'We14', data:'07/07 Ter', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
-    {id:'e24', s1:'We15', s2:'We16', data:'07/07 Ter', hora:'17h', local:'Vancouver (BC Place)'},
+    {id:'e21', s1:'We11', s2:'We12', data:'06/07 Seg', hora:'16h', local:'Dallas (AT&T Stadium)'},
+    {id:'e22', s1:'We09', s2:'We10', data:'06/07 Seg', hora:'21h', local:'Seattle (Lumen Field)'},
+    {id:'e23', s1:'We14', s2:'We16', data:'07/07 Ter', hora:'13h', local:'Atlanta (Mercedes-Benz Stadium)'},
+    {id:'e24', s1:'We13', s2:'We15', data:'07/07 Ter', hora:'17h', local:'Vancouver (BC Place)'},
   ]},
   { label:'Quartas de Final', jogos:[
     {id:'e25', s1:'We17', s2:'We18', data:'09/07 Qui', hora:'17h', local:'Boston (Gillette Stadium)'},
-    {id:'e26', s1:'We19', s2:'We20', data:'10/07 Sex', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
-    {id:'e27', s1:'We21', s2:'We22', data:'11/07 Sáb', hora:'18h', local:'Miami (Hard Rock Stadium)'},
+    {id:'e26', s1:'We21', s2:'We22', data:'10/07 Sex', hora:'16h', local:'Los Angeles (SoFi Stadium)'},
+    {id:'e27', s1:'We19', s2:'We20', data:'11/07 Sáb', hora:'18h', local:'Miami (Hard Rock Stadium)'},
     {id:'e28', s1:'We23', s2:'We24', data:'11/07 Sáb', hora:'22h', local:'Kansas City (Arrowhead Stadium)'},
   ]},
   { label:'Semifinal', jogos:[
@@ -1399,14 +1400,38 @@ function renderBracket() {
   const c = document.getElementById('bracket-container');
   let html = '';
 
-  BRACKET_FASES.forEach(fase => {
-    html += `<div class="fase-col"><div class="fase-titulo">${fase.label}</div><div class="fase-jogos">`;
-    fase.jogos.forEach(jogo => {
+  const COLS_DEFINITIONS = [
+    { label: '32 Avos de Final', jogos: ['e02', 'e05', 'e01', 'e03', 'e11', 'e12', 'e09', 'e10'] },
+    { label: 'Oitavas de Final', jogos: ['e17', 'e18', 'e21', 'e22'] },
+    { label: 'Quartas de Final', jogos: ['e25', 'e26'] },
+    { label: 'Semifinal', jogos: ['e29'] },
+    { label: 'Final', jogos: ['e31'] },
+    { label: 'Semifinal', jogos: ['e30'] },
+    { label: 'Quartas de Final', jogos: ['e27', 'e28'] },
+    { label: 'Oitavas de Final', jogos: ['e19', 'e20', 'e23', 'e24'] },
+    { label: '32 Avos de Final', jogos: ['e04', 'e06', 'e07', 'e08', 'e14', 'e16', 'e13', 'e15'] }
+  ];
+
+  function findJogoById(id) {
+    for (const fase of BRACKET_FASES) {
+      const jogo = fase.jogos.find(j => j.id === id);
+      if (jogo) return jogo;
+    }
+    return null;
+  }
+
+  COLS_DEFINITIONS.forEach(col => {
+    html += `<div class="fase-col"><div class="fase-titulo">${col.label}</div><div class="fase-jogos">`;
+    col.jogos.forEach(jogoId => {
+      const jogo = findJogoById(jogoId);
+      if (!jogo) return;
+
       const t1 = jogo._t1, t2 = jogo._t2;
       const p = placares[jogo.id]||{};
       const temPlacar = p.g1!==null&&p.g1!==undefined&&p.g2!==null&&p.g2!==undefined&&p.status==='FINISHED';
       const brasil = t1==='Brasil'||t2==='Brasil';
       const v1 = temPlacar&&p.g1>p.g2, v2 = temPlacar&&p.g2>p.g1;
+      const isFinal = jogo.id === 'e31';
 
       let dataExibicao = jogo.data;
       let horaExibicao = jogo.hora;
@@ -1416,7 +1441,7 @@ function renderBracket() {
         horaExibicao = formatado.hora;
       }
 
-      html += `<div class="bk-jogo${brasil?' brasil-bk':''}" onclick="${t1&&t2?`abrirH2H('${jogo.id}','${t1}','${t2}')`:''}" >`;
+      html += `<div class="bk-jogo${brasil?' brasil-bk':''}${isFinal?' final-bk':''}" onclick="${t1&&t2?`abrirH2H('${jogo.id}','${t1}','${t2}')`:''}" >`;
       if (t1) {
         const badge1 = jogo._t1_pos ? `<span class="bk-pos-badge">${jogo._t1_pos}</span>` : '';
         html += `<div class="bk-time${v1?' vencedor-bk':''}">
